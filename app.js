@@ -99,24 +99,36 @@ function drawLinePath(points) {
 
 }
 
+function makeCircleConditionally(x, y, radius){
+
+    const currentPoint = pathPoints[pathPoints.length - 1];
+    const key = getCoordKey({x, y});
+    const compare = pathEdgeMap[key];
+    if(!compare || !compare.includes(getCoordKey(currentPoint))){
+        return two.makeCircle(x, y, radius);
+    }
+}
+
 function drawMoveableSpots(fromCoord, increment) {
     const points = [];
     const MOVEABLE_CIRCLE_RADIUS = 8;
 
     points.push(
-        two.makeCircle(fromCoord.x - increment, fromCoord.y, MOVEABLE_CIRCLE_RADIUS),
-        two.makeCircle(fromCoord.x + increment, fromCoord.y, MOVEABLE_CIRCLE_RADIUS),
-        two.makeCircle(fromCoord.x, fromCoord.y - increment, MOVEABLE_CIRCLE_RADIUS),
-        two.makeCircle(fromCoord.x, fromCoord.y + increment, MOVEABLE_CIRCLE_RADIUS),
-        two.makeCircle(fromCoord.x - increment, fromCoord.y - increment, MOVEABLE_CIRCLE_RADIUS),
-        two.makeCircle(fromCoord.x - increment, fromCoord.y + increment, MOVEABLE_CIRCLE_RADIUS),
-        two.makeCircle(fromCoord.x + increment, fromCoord.y + increment, MOVEABLE_CIRCLE_RADIUS),
-        two.makeCircle(fromCoord.x + increment, fromCoord.y - increment, MOVEABLE_CIRCLE_RADIUS),
+        makeCircleConditionally(fromCoord.x - increment, fromCoord.y, MOVEABLE_CIRCLE_RADIUS),
+        makeCircleConditionally(fromCoord.x + increment, fromCoord.y, MOVEABLE_CIRCLE_RADIUS),
+        makeCircleConditionally(fromCoord.x, fromCoord.y - increment, MOVEABLE_CIRCLE_RADIUS),
+        makeCircleConditionally(fromCoord.x, fromCoord.y + increment, MOVEABLE_CIRCLE_RADIUS),
+        makeCircleConditionally(fromCoord.x - increment, fromCoord.y - increment, MOVEABLE_CIRCLE_RADIUS),
+        makeCircleConditionally(fromCoord.x - increment, fromCoord.y + increment, MOVEABLE_CIRCLE_RADIUS),
+        makeCircleConditionally(fromCoord.x + increment, fromCoord.y + increment, MOVEABLE_CIRCLE_RADIUS),
+        makeCircleConditionally(fromCoord.x + increment, fromCoord.y - increment, MOVEABLE_CIRCLE_RADIUS),
     );
+
+    const filteredPoints = points.filter(p => p);
 
     two.update();
 
-    points.forEach(p => {
+    filteredPoints.forEach(p => {
         p._renderer.elem.addEventListener('mouseover', function () {
             p.fill = "lightblue";
             p.opacity = 0.6;
@@ -128,12 +140,32 @@ function drawMoveableSpots(fromCoord, increment) {
             two.update();
         });
         p._renderer.elem.addEventListener('click', function () {
-            // alert(p._translation.x + " " + p._translation.y);
-            pathPoints.push({x: p._translation.x, y: p._translation.y});
+
+            const lastPoint = pathPoints[pathPoints.length - 1];
+            const newPoint = {x: p._translation.x, y: p._translation.y};
+
+            const lastPointKey = getCoordKey(lastPoint);
+            const newPointKey = getCoordKey(newPoint);
+
+            pathPoints.push(newPoint);
+            if(pathEdgeMap[newPointKey] && pathEdgeMap[newPointKey].length){
+                pathEdgeMap[newPointKey].push(lastPointKey);
+                pathEdgeMap[lastPointKey].push(newPointKey);
+            } else {
+                pathEdgeMap[newPointKey] = [lastPointKey];
+                pathEdgeMap[lastPointKey].push(newPointKey);
+            }
+
+            console.log(pathEdgeMap);
+
             renderPath();
         });
     });
-    moveablePoints = [...points];
+    moveablePoints = [...filteredPoints];
+}
+
+function getCoordKey(point){
+    return `${point.x}${point.y}`;
 }
 
 function renderPath(){
@@ -149,12 +181,10 @@ function renderPath(){
 
 const centerpoint = getCenterPoint(10, 8, 50);
 const pathPoints = [centerpoint];
-
+const pathEdgeMap = {[getCoordKey(centerpoint)]: []};
 let moveablePoints = [];
 let dotMarker = null;
 drawMoveableSpots(centerpoint, 50);
-
-const pointMap = {};
 
 drawGraphPaper(10, 8, 50);
 drawPitch(10, 8, 50);

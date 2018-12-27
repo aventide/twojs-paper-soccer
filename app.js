@@ -1,68 +1,105 @@
 // const config = {fullscreen: true};
-const config = {width: 450, height: 500};
+const config = {width: 400, height: 500};
+let NUMBER_ROWS = 10;
+let NUMBER_COLS = 8;
+let EDGE_LENGTH = 50;
+
+// window.addEventListener('resize', function(){
+//     if(window.innerWidth <= 800){
+//         two.width = window.innerWidth;
+//         EDGE_LENGTH = window.innerWidth / 8;
+//         two.height = window.innerHeight - (EDGE_LENGTH * 2);
+//         // setup();
+//     }
+// });
 
 const appElem = document.getElementById('app');
 const two = new Two(config);
 
 two.appendTo(appElem);
 
-function drawGraphPaper(nRows, nCols, increment) {
-    for (let x = 0; x <= nRows; x++) {
-        const line = two.makeLine(0, x * increment, (nCols * increment), x * increment);
+// edgeMap: a hashmap to track which edges exist, or which points connect to which others already
+// handles: references to two.js objects after creation, so they can be deleted or manipulated. May not include objects that never need manipulation.
+gameState = {
+    edgeMap: {},
+    handles: {
+        legalMoveVertices: []
+    }
+};
+
+const centerpoint = getCenterPoint();
+const pathPoints = [centerpoint];
+const pathEdgeMap = {[getCoordKey(centerpoint)]: []};
+let moveablePoints = [];
+let dotMarker = null;
+setup();
+
+function setup(){
+
+    const centerpoint = getCenterPoint();
+    drawGraphPaper();
+    drawPitch();
+    drawStartDot(centerpoint);
+    renderPath();
+}
+
+
+function drawGraphPaper() {
+    for (let x = 0; x <= NUMBER_ROWS; x++) {
+        const line = two.makeLine(0, x * EDGE_LENGTH, (NUMBER_COLS * EDGE_LENGTH), x * EDGE_LENGTH);
         line.stroke = "lightblue";
     }
-    for (let y = 0; y <= nCols; y++) {
-        const line = two.makeLine(y * increment, 0, y * increment, (nRows * increment));
+    for (let y = 0; y <= NUMBER_COLS; y++) {
+        const line = two.makeLine(y * EDGE_LENGTH, 0, y * EDGE_LENGTH, (NUMBER_ROWS * EDGE_LENGTH));
         line.stroke = "lightblue";
     }
 }
 
-function getCenterPoint(nRows, nCols, increment) {
-    const centerpointX = nCols * increment / 2;
-    const centerpointY = nRows * increment / 2;
+function getCenterPoint() {
+    const centerpointX = NUMBER_COLS * EDGE_LENGTH / 2;
+    const centerpointY = NUMBER_ROWS * EDGE_LENGTH / 2;
     return {
         x: centerpointX,
         y: centerpointY
     };
 }
 
-function drawPitch(nRows, nCols, increment) {
+function drawPitch() {
 
     const segments = [];
 
-    // get center
-    const centerpointX = nCols * increment / 2;
-    const centerpointY = nRows * increment / 2;
+    // get horizontal center
+    const centerpointX = NUMBER_COLS * EDGE_LENGTH / 2;
 
     // get half-height
-    const heightBound = nRows * increment;
-    const widthBound = nCols * increment;
+    const heightBound = NUMBER_ROWS * EDGE_LENGTH;
+    const widthBound = NUMBER_COLS * EDGE_LENGTH;
 
     // draw goal ends
     segments.push(
         // top end
 
-        two.makeLine(centerpointX - increment, 0, centerpointX + increment, 0),
+        two.makeLine(centerpointX - EDGE_LENGTH, 0, centerpointX + EDGE_LENGTH, 0),
 
-        two.makeLine(centerpointX - increment, 0, centerpointX - increment, increment),
-        two.makeLine(centerpointX + increment, 0, centerpointX + increment, increment),
+        two.makeLine(centerpointX - EDGE_LENGTH, 0, centerpointX - EDGE_LENGTH, EDGE_LENGTH),
+        two.makeLine(centerpointX + EDGE_LENGTH, 0, centerpointX + EDGE_LENGTH, EDGE_LENGTH),
 
-        two.makeLine(centerpointX - increment, increment, centerpointX - increment * 4, increment),
-        two.makeLine(centerpointX + increment, increment, centerpointX + increment * 4, increment),
+        two.makeLine(centerpointX - EDGE_LENGTH, EDGE_LENGTH, centerpointX - EDGE_LENGTH * 4, EDGE_LENGTH),
+        two.makeLine(centerpointX + EDGE_LENGTH, EDGE_LENGTH, centerpointX + EDGE_LENGTH * 4, EDGE_LENGTH),
 
         // bottom end
 
-        two.makeLine(centerpointX - increment, heightBound, centerpointX + increment, heightBound),
-        two.makeLine(centerpointX - increment, heightBound, centerpointX - increment, heightBound - increment),
-        two.makeLine(centerpointX + increment, heightBound, centerpointX + increment, heightBound - increment),
+        two.makeLine(centerpointX - EDGE_LENGTH, heightBound, centerpointX + EDGE_LENGTH, heightBound),
+        two.makeLine(centerpointX - EDGE_LENGTH, heightBound, centerpointX - EDGE_LENGTH, heightBound - EDGE_LENGTH),
+        two.makeLine(centerpointX + EDGE_LENGTH, heightBound, centerpointX + EDGE_LENGTH, heightBound - EDGE_LENGTH),
 
-        two.makeLine(centerpointX - increment, heightBound - increment, centerpointX - increment * 4, heightBound - increment),
-        two.makeLine(centerpointX + increment, heightBound - increment, centerpointX + increment * 4, heightBound - increment),
+        two.makeLine(centerpointX - EDGE_LENGTH, heightBound - EDGE_LENGTH, centerpointX - EDGE_LENGTH * 4, heightBound - EDGE_LENGTH),
+        two.makeLine(centerpointX + EDGE_LENGTH, heightBound - EDGE_LENGTH, centerpointX + EDGE_LENGTH * 4, heightBound - EDGE_LENGTH),
 
         // sides
 
-        two.makeLine(0, increment, 0, heightBound - increment),
-        two.makeLine(widthBound, increment, widthBound, heightBound - increment),
+        two.makeLine(0, EDGE_LENGTH, 0, heightBound - EDGE_LENGTH),
+        two.makeLine(widthBound, EDGE_LENGTH, widthBound, heightBound - EDGE_LENGTH),
     );
 
 
@@ -99,29 +136,29 @@ function drawLinePath(points) {
 
 }
 
-function makeCircleConditionally(x, y, radius){
-
-    const currentPoint = pathPoints[pathPoints.length - 1];
-    const key = getCoordKey({x, y});
-    const compare = pathEdgeMap[key];
-    if(!compare || !compare.includes(getCoordKey(currentPoint))){
-        return two.makeCircle(x, y, radius);
-    }
-}
-
-function drawMoveableSpots(fromCoord, increment) {
+function drawMoveableSpots(fromCoord) {
     const points = [];
     const MOVEABLE_CIRCLE_RADIUS = 8;
 
+    function makeCircleConditionally(x, y, radius) {
+
+        const currentPoint = pathPoints[pathPoints.length - 1];
+        const key = getCoordKey({x, y});
+        const compare = pathEdgeMap[key];
+        if (!compare || !compare.includes(getCoordKey(currentPoint))) {
+            return two.makeCircle(x, y, radius);
+        }
+    }
+
     points.push(
-        makeCircleConditionally(fromCoord.x - increment, fromCoord.y, MOVEABLE_CIRCLE_RADIUS),
-        makeCircleConditionally(fromCoord.x + increment, fromCoord.y, MOVEABLE_CIRCLE_RADIUS),
-        makeCircleConditionally(fromCoord.x, fromCoord.y - increment, MOVEABLE_CIRCLE_RADIUS),
-        makeCircleConditionally(fromCoord.x, fromCoord.y + increment, MOVEABLE_CIRCLE_RADIUS),
-        makeCircleConditionally(fromCoord.x - increment, fromCoord.y - increment, MOVEABLE_CIRCLE_RADIUS),
-        makeCircleConditionally(fromCoord.x - increment, fromCoord.y + increment, MOVEABLE_CIRCLE_RADIUS),
-        makeCircleConditionally(fromCoord.x + increment, fromCoord.y + increment, MOVEABLE_CIRCLE_RADIUS),
-        makeCircleConditionally(fromCoord.x + increment, fromCoord.y - increment, MOVEABLE_CIRCLE_RADIUS),
+        makeCircleConditionally(fromCoord.x - EDGE_LENGTH, fromCoord.y, MOVEABLE_CIRCLE_RADIUS),
+        makeCircleConditionally(fromCoord.x + EDGE_LENGTH, fromCoord.y, MOVEABLE_CIRCLE_RADIUS),
+        makeCircleConditionally(fromCoord.x, fromCoord.y - EDGE_LENGTH, MOVEABLE_CIRCLE_RADIUS),
+        makeCircleConditionally(fromCoord.x, fromCoord.y + EDGE_LENGTH, MOVEABLE_CIRCLE_RADIUS),
+        makeCircleConditionally(fromCoord.x - EDGE_LENGTH, fromCoord.y - EDGE_LENGTH, MOVEABLE_CIRCLE_RADIUS),
+        makeCircleConditionally(fromCoord.x - EDGE_LENGTH, fromCoord.y + EDGE_LENGTH, MOVEABLE_CIRCLE_RADIUS),
+        makeCircleConditionally(fromCoord.x + EDGE_LENGTH, fromCoord.y + EDGE_LENGTH, MOVEABLE_CIRCLE_RADIUS),
+        makeCircleConditionally(fromCoord.x + EDGE_LENGTH, fromCoord.y - EDGE_LENGTH, MOVEABLE_CIRCLE_RADIUS),
     );
 
     const filteredPoints = points.filter(p => p);
@@ -148,7 +185,7 @@ function drawMoveableSpots(fromCoord, increment) {
             const newPointKey = getCoordKey(newPoint);
 
             pathPoints.push(newPoint);
-            if(pathEdgeMap[newPointKey] && pathEdgeMap[newPointKey].length){
+            if (pathEdgeMap[newPointKey] && pathEdgeMap[newPointKey].length) {
                 pathEdgeMap[newPointKey].push(lastPointKey);
                 pathEdgeMap[lastPointKey].push(newPointKey);
             } else {
@@ -156,38 +193,29 @@ function drawMoveableSpots(fromCoord, increment) {
                 pathEdgeMap[lastPointKey].push(newPointKey);
             }
 
-            console.log(pathEdgeMap);
-
             renderPath();
         });
     });
+
+    // remove old circles from the pitch
+    two.remove(moveablePoints);
     moveablePoints = [...filteredPoints];
 }
 
-function getCoordKey(point){
+function getCoordKey(point) {
     return `${point.x}${point.y}`;
 }
 
-function renderPath(){
+// ah jeez, we need a handle to the array of lines...
+// function backTrack(){
+//     two.remove()
+// }
+
+function renderPath() {
     const currentDot = drawLinePath(pathPoints, 50);
-    two.remove(moveablePoints);
     two.remove(dotMarker);
-    moveablePoints = [];
     drawMoveableSpots(currentDot, 50);
     dotMarker = two.makeCircle(currentDot.x, currentDot.y, 12);
     dotMarker.fill = "yellow";
     two.update();
 }
-
-const centerpoint = getCenterPoint(10, 8, 50);
-const pathPoints = [centerpoint];
-const pathEdgeMap = {[getCoordKey(centerpoint)]: []};
-let moveablePoints = [];
-let dotMarker = null;
-drawMoveableSpots(centerpoint, 50);
-
-drawGraphPaper(10, 8, 50);
-drawPitch(10, 8, 50);
-drawStartDot(centerpoint);
-
-renderPath();

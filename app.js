@@ -163,6 +163,7 @@ function drawLinePath(points, edgeLength) {
         y: p.y * edgeLength
     }));
 
+    const handles = [];
     let currentPoint;
     let nextPoint;
 
@@ -173,12 +174,20 @@ function drawLinePath(points, edgeLength) {
             const segment = two.makeLine(currentPoint.x, currentPoint.y, nextPoint.x, nextPoint.y);
             segment.stroke = "black";
             segment.linewidth = 2;
+            handles.push(segment);
         }
     }
 
-    // const normalizedCurrentPoint = {x: currentPoint.x / edgeLength, y: currentPoint.y / edgeLength};
-    // return normalizedCurrentPoint;
+    return handles;
 
+}
+
+function drawSingleLine(edgeLength){
+    currentPoint = game.model.pointList[game.model.pointList.length - 2];
+    nextPoint = game.model.pointList[game.model.pointList.length - 1];
+    renderableCurrentPoint = {x: currentPoint.x * edgeLength, y: currentPoint.y * edgeLength};
+    renderableNextPoint = {x: nextPoint.x * edgeLength, y: nextPoint.y * edgeLength};
+    return two.makeLine(renderableCurrentPoint.x, renderableCurrentPoint.y, renderableNextPoint.x, renderableNextPoint.y);
 }
 
 function drawMoveableSpots(fromCoord, edgeLength) {
@@ -266,7 +275,11 @@ function renderPath(edgeLength) {
     const currentPoint = game.model.pointList[game.model.pointList.length - 1];
 
     // const currentDot =
-    drawLinePath(game.model.pointList, edgeLength);
+    if (game.model.pointList && game.model.pointList.length <= 1) {
+        drawLinePath(game.model.pointList, edgeLength);
+    } else {
+        drawSingleLine(edgeLength);
+    }
     two.remove(game.handles.currentPositionDot);
     drawMoveableSpots(currentPoint, edgeLength);
     game.handles.currentPositionDot = two.makeCircle(currentPoint.x * edgeLength, currentPoint.y * edgeLength, edgeLength / 5);

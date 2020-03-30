@@ -1,0 +1,23 @@
+{
+  "name": "twojs-paper-soccer",
+  "version": "1.0.0",
+  "description": "The game of paper soccer on the web",
+  "main": "index.js",
+  "scripts": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/misterlocations/twojs-paper-soccer.git"
+  },
+  "author": "Alex Staples",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/misterlocations/twojs-paper-soccer/issues"
+  },
+  "homepage": "https://github.com/misterlocations/twojs-paper-soccer#readme",
+  "dependencies": {
+    "node-sass": "^4.13.1",
+    "parcel-bundler": "^1.12.4"
+  }
+}

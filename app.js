@@ -1,9 +1,11 @@
 import mobilecheck from "./util/mobilecheck";
 
-// const defaultConfig = {fullscreen: true};
+// Row/Col numbers and padding must have the same ratios!
 const NUMBER_ROWS = 10;
 const NUMBER_COLS = 8;
-const DEFAULT_PADDING = 10;
+const DEFAULT_PADDING_Y = 10;
+const DEFAULT_PADDING_X = 8;
+
 const defaultConfig = { width: 700, height: 875 };
 const defaultEdgeLength = defaultConfig.width / NUMBER_COLS;
 
@@ -79,13 +81,13 @@ function drawResponsivePitch() {
   // at this point, we need to calculate the actual drawable area
 
   const pitchAnchorPoint = {
-    x: DEFAULT_PADDING,
-    y: DEFAULT_PADDING
+    x: DEFAULT_PADDING_X,
+    y: DEFAULT_PADDING_Y
   };
 
   const pitchEndPoint = {
-    x: two.width - DEFAULT_PADDING,
-    y: two.height - DEFAULT_PADDING
+    x: two.width - DEFAULT_PADDING_X,
+    y: two.height - DEFAULT_PADDING_Y
   };
 
   game.boxes.pitch = {
@@ -99,6 +101,7 @@ function drawResponsivePitch() {
 drawResponsivePitch();
 
 function drawPitch(pitch) {
+  // this might be an ugly= float, but seems to be fine for now...
   const edgeLength = (pitch.end.x - pitch.anchor.x) / NUMBER_COLS;
 
   two.clear();
@@ -157,8 +160,6 @@ function drawPitchBorders(box, edgeLength) {
 
   // get half-height
   const heightBound = end.y;
-  const widthBound = end.x;
-
   // draw goal ends
   segments.push(
     // top end
@@ -231,18 +232,8 @@ function drawPitchBorders(box, edgeLength) {
 
     // sides
 
-    two.makeLine(
-      anchor.x,
-      anchor.y + edgeLength,
-      anchor.x,
-      heightBound - edgeLength
-    ),
-    two.makeLine(
-      widthBound,
-      anchor.y + edgeLength,
-      widthBound,
-      heightBound - edgeLength
-    )
+    two.makeLine(anchor.x, anchor.y + edgeLength, anchor.x, end.y - edgeLength),
+    two.makeLine(end.x, anchor.y + edgeLength, end.x, end.y - edgeLength)
   );
 
   segments.forEach(s => (s.linewidth = 3));

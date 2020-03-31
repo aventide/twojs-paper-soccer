@@ -60,6 +60,7 @@ const game = {
 function drawResponsivePitch() {
   const { innerWidth, innerHeight } = window;
 
+  // in the future, let's probably just display a "height is too small" message in css
   if (innerWidth <= 700 || isMobile) {
     if (innerHeight >= innerWidth) {
       two.width = innerWidth;
@@ -101,17 +102,17 @@ function drawResponsivePitch() {
 drawResponsivePitch();
 
 function drawPitch(pitch) {
-  // this might be an ugly= float, but seems to be fine for now...
+  // this might be an ugly float, but seems to be fine for now...
   const edgeLength = (pitch.end.x - pitch.anchor.x) / NUMBER_COLS;
 
   two.clear();
   game.handles = { ...initialHandles };
 
   // @TODO start adapting here, using the pitch argument
-  const centerpoint = getCenterPoint(edgeLength);
-  game.handles.pitchBorders = drawPitchBorders(pitch, edgeLength);
+  // do we really need both of these args though? They seem really global...refactor this later, you asshole.
   game.handles.graphPaper = drawGraphPaper(pitch, edgeLength);
-  game.handles.startPositionDot = drawStartDot(centerpoint, edgeLength);
+  game.handles.pitchBorders = drawPitchBorders(pitch, edgeLength);
+  game.handles.startPositionDot = drawStartDot(pitch, edgeLength);
   renderPath(edgeLength);
 }
 
@@ -240,8 +241,14 @@ function drawPitchBorders(box, edgeLength) {
   return segments;
 }
 
-function drawStartDot(point, edgeLength) {
-  const renderablePoint = { x: point.x * edgeLength, y: point.y * edgeLength };
+function drawStartDot(box, edgeLength) {
+  const point = getCenterPoint(edgeLength);
+  const { anchor } = box;
+
+  const renderablePoint = {
+    x: anchor.x + point.x * edgeLength,
+    y: anchor.y + point.y * edgeLength
+  };
 
   const dot = two.makeCircle(renderablePoint.x, renderablePoint.y, 8);
   dot.fill = "black";
@@ -254,10 +261,12 @@ function drawLinePath(points, edgeLength) {
     return;
   }
 
+  const { anchor } = game.boxes.pitch;
+
   // scale up distances between points
   const renderablePoints = points.map(p => ({
-    x: p.x * edgeLength,
-    y: p.y * edgeLength
+    x: anchor.x + p.x * edgeLength,
+    y: anchor.y + p.y * edgeLength
   }));
 
   let currentPoint;
@@ -295,10 +304,16 @@ function drawMoveableSpots(fromCoord, edgeLength) {
     }
 
     const currentPoint = game.model.pointList[game.model.pointList.length - 1];
+    const { anchor } = game.boxes.pitch;
+
     const key = getCoordKey({ x, y });
     const compare = game.model.edgeMap[key];
     if (!compare || !compare.includes(getCoordKey(currentPoint))) {
-      return two.makeCircle(x * edgeLength, y * edgeLength, radius);
+      return two.makeCircle(
+        anchor.x + x * edgeLength,
+        anchor.y + y * edgeLength,
+        radius
+      );
     }
   }
 
@@ -329,10 +344,11 @@ function drawMoveableSpots(fromCoord, edgeLength) {
       two.update();
     });
     p._renderer.elem.addEventListener("click", function() {
+      const { anchor } = game.boxes.pitch;
       const lastPoint = game.model.pointList[game.model.pointList.length - 1];
       const newPoint = {
-        x: p._translation.x / edgeLength,
-        y: p._translation.y / edgeLength
+        x: (p._translation.x - anchor.x) / edgeLength,
+        y: (p._translation.y - anchor.y) / edgeLength
       };
 
       const lastPointKey = getCoordKey(lastPoint);
@@ -365,13 +381,14 @@ function getCoordKey(point) {
 
 function renderPath(edgeLength) {
   const currentPoint = game.model.pointList[game.model.pointList.length - 1];
+  const { anchor } = game.boxes.pitch;
 
   drawLinePath(game.model.pointList, edgeLength);
   two.remove(game.handles.currentPositionDot);
   drawMoveableSpots(currentPoint, edgeLength);
   game.handles.currentPositionDot = two.makeCircle(
-    currentPoint.x * edgeLength,
-    currentPoint.y * edgeLength,
+    anchor.x + currentPoint.x * edgeLength,
+    anchor.y + currentPoint.y * edgeLength,
     edgeLength / 5
   );
   game.handles.currentPositionDot.fill = "yellow";

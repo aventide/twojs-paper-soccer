@@ -1,60 +1,34 @@
 import mobilecheck from "./util/mobilecheck";
-
-// Row/Col numbers and padding must have the same ratios!
-const NUMBER_ROWS = 10;
-const NUMBER_COLS = 8;
-const DEFAULT_PADDING_Y = 10;
-const DEFAULT_PADDING_X = 8;
-
-const defaultConfig = { width: 700, height: 875 };
-const defaultEdgeLength = defaultConfig.width / NUMBER_COLS;
+import {
+  NUMBER_ROWS,
+  NUMBER_COLS,
+  DEFAULT_PADDING_X,
+  DEFAULT_PADDING_Y,
+  DEFAULT_CONFIG,
+  INITIAL_GAME_MODEL,
+} from "./constants";
 
 const isMobile = mobilecheck();
 if (isMobile) {
   alert("Mobile Device Detected.");
 }
 
-window.addEventListener("resize", function() {
+window.addEventListener("resize", function () {
   drawResponsivePitch();
 });
 
 // DOM stuff for Two.js
 const appElem = document.getElementById("app");
-const two = new Two(defaultConfig);
+const two = new Two(DEFAULT_CONFIG);
 two.appendTo(appElem);
 
-const initialHandles = {
-  edges: [],
-  legalMoveVertices: [],
-  currentPositionDot: null,
-  startPositionDot: null,
-  graphPaper: null,
-  pitchBorders: null
-};
-
-const centerpoint = getCenterPoint(defaultEdgeLength);
 // boxes: subdvisions of the main canvas specific for this game. Used for placement of main elements
 // model: effective state to base rendering from
 // handles: references to two.js objects after creation, so they can be deleted or manipulated. May not include objects that never need manipulation.
 
+// game state: whose turn it is, whether turn is complete (any possible moves left), path in current turn (if enabled), whether game is won and who won
 const game = {
-  boxes: {
-    pitch: {
-      anchor: {
-        x: 0,
-        y: 0
-      },
-      end: {
-        x: 0,
-        y: 0
-      }
-    }
-  },
-  model: {
-    pointList: [centerpoint],
-    edgeMap: { [getCoordKey(centerpoint)]: [] }
-  },
-  handles: { ...initialHandles }
+  ...INITIAL_GAME_MODEL,
 };
 
 function drawResponsivePitch() {
@@ -70,8 +44,8 @@ function drawResponsivePitch() {
       two.width = innerHeight * 0.8;
     }
   } else {
-    two.width = defaultConfig.width;
-    two.height = defaultConfig.height;
+    two.width = DEFAULT_CONFIG.width;
+    two.height = DEFAULT_CONFIG.height;
   }
 
   // make function that defines a box within the canvas
@@ -83,17 +57,17 @@ function drawResponsivePitch() {
 
   const pitchAnchorPoint = {
     x: DEFAULT_PADDING_X,
-    y: DEFAULT_PADDING_Y
+    y: DEFAULT_PADDING_Y,
   };
 
   const pitchEndPoint = {
     x: two.width - DEFAULT_PADDING_X,
-    y: two.height - DEFAULT_PADDING_Y
+    y: two.height - DEFAULT_PADDING_Y,
   };
 
   game.boxes.pitch = {
     anchor: { ...pitchAnchorPoint },
-    end: { ...pitchEndPoint }
+    end: { ...pitchEndPoint },
   };
 
   drawPitch(game.boxes.pitch);
@@ -106,7 +80,6 @@ function drawPitch(pitch) {
   const edgeLength = (pitch.end.x - pitch.anchor.x) / NUMBER_COLS;
 
   two.clear();
-  game.handles = { ...initialHandles };
 
   // @TODO start adapting here, using the pitch argument
   // do we really need both of these args though? They seem really global...refactor this later, you asshole.
@@ -148,7 +121,7 @@ function drawGraphPaper(box, edgeLength) {
 function getCenterPoint() {
   return {
     x: NUMBER_COLS / 2,
-    y: NUMBER_ROWS / 2
+    y: NUMBER_ROWS / 2,
   };
 }
 
@@ -237,7 +210,7 @@ function drawPitchBorders(box, edgeLength) {
     two.makeLine(end.x, anchor.y + edgeLength, end.x, end.y - edgeLength)
   );
 
-  segments.forEach(s => (s.linewidth = 3));
+  segments.forEach((s) => (s.linewidth = 3));
   return segments;
 }
 
@@ -247,7 +220,7 @@ function drawStartDot(box, edgeLength) {
 
   const renderablePoint = {
     x: anchor.x + point.x * edgeLength,
-    y: anchor.y + point.y * edgeLength
+    y: anchor.y + point.y * edgeLength,
   };
 
   const dot = two.makeCircle(renderablePoint.x, renderablePoint.y, 8);
@@ -264,9 +237,9 @@ function drawLinePath(points, edgeLength) {
   const { anchor } = game.boxes.pitch;
 
   // scale up distances between points
-  const renderablePoints = points.map(p => ({
+  const renderablePoints = points.map((p) => ({
     x: anchor.x + p.x * edgeLength,
-    y: anchor.y + p.y * edgeLength
+    y: anchor.y + p.y * edgeLength,
   }));
 
   let currentPoint;
@@ -328,28 +301,31 @@ function drawMoveableSpots(fromCoord, edgeLength) {
     makeCircleConditionally(fromCoord.x + 1, fromCoord.y - 1, radius)
   );
 
-  const filteredPoints = points.filter(p => p);
+  const filteredPoints = points.filter((p) => p);
 
   two.update();
 
-  filteredPoints.forEach(p => {
-    p._renderer.elem.addEventListener("mouseover", function() {
+  filteredPoints.forEach((p) => {
+    p._renderer.elem.addEventListener("mouseover", function () {
       p.fill = "lightblue";
       p.opacity = 0.6;
       two.update();
     });
-    p._renderer.elem.addEventListener("mouseout", function() {
+    p._renderer.elem.addEventListener("mouseout", function () {
       p.fill = "white";
       p.opacity = 1;
       two.update();
     });
-    p._renderer.elem.addEventListener("click", function() {
+    p._renderer.elem.addEventListener("click", function () {
       const { anchor } = game.boxes.pitch;
       const lastPoint = game.model.pointList[game.model.pointList.length - 1];
+
       const newPoint = {
         x: (p._translation.x - anchor.x) / edgeLength,
-        y: (p._translation.y - anchor.y) / edgeLength
+        y: (p.translation.y - anchor.y) / edgeLength,
       };
+
+      testForVictory(newPoint);
 
       const lastPointKey = getCoordKey(lastPoint);
       const newPointKey = getCoordKey(newPoint);
@@ -393,4 +369,16 @@ function renderPath(edgeLength) {
   );
   game.handles.currentPositionDot.fill = "yellow";
   two.update();
+}
+
+function testForVictory(point) {
+  // make sure this is legal
+
+  // test for player 1 victory
+  if (point.y <= 0) {
+    game.model.winner = "1";
+    // test for player 2 victory
+  } else if (point.y >= NUMBER_ROWS) {
+    game.model.winner = "2";
+  }
 }

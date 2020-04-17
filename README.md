@@ -6,6 +6,8 @@ The game of paper soccer, usually played IRL on graph paper. Except this time, p
 
 ## Development
 
+This project uses [parcel-bundler]() to bundle internal dependencies and transpile.
+
 ### Setup:
 
 1. Install `parcel-bundler` and `node-sass` from npm. Keep in mind that node-sass should be installed locally.
@@ -37,6 +39,7 @@ The game of paper soccer, usually played IRL on graph paper. Except this time, p
    - Determine whether a victory is reached.
      - If so, remove movement dots and then see (4) below
    - Determine if the player's turn has ended.
+   - (If AI, decide a move based on intelligence level)
 
 4. Victory has been reached
    - Record the victory (TBD - stub this for now)

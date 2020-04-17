@@ -23,6 +23,10 @@ const INITIAL_HANDLES = {
   pitchBorders: null,
 };
 
+// boxes: subdvisions of the main canvas specific for this game. Used for placement of main elements
+// model: effective state to base rendering from
+// handles: references to two.js objects after creation, so they can be deleted or manipulated. May not include objects that never need manipulation.
+// twoInstance: reference to the two.js instance we host the game with.
 const INITIAL_GAME_MODEL = {
   boxes: {
     pitch: {
@@ -42,6 +46,8 @@ const INITIAL_GAME_MODEL = {
     winner: null,
   },
   handles: { ...INITIAL_HANDLES },
+  twoInstance: null,
+  routines: null,
 };
 
 export {

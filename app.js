@@ -8,6 +8,8 @@ import {
   INITIAL_GAME_MODEL,
 } from "./constants";
 
+import { getCoordKey } from "./util";
+
 const isMobile = mobilecheck();
 if (isMobile) {
   alert("Mobile Device Detected.");
@@ -86,7 +88,7 @@ function drawPitch(pitch) {
   game.handles.graphPaper = drawGraphPaper(pitch, edgeLength);
   game.handles.pitchBorders = drawPitchBorders(pitch, edgeLength);
   game.handles.startPositionDot = drawStartDot(pitch, edgeLength);
-  renderPath(edgeLength);
+  renderPlayerGraphics(edgeLength);
 }
 
 function drawGraphPaper(box, edgeLength) {
@@ -261,6 +263,10 @@ function drawLinePath(points, edgeLength) {
   }
 }
 
+function eraseMoveableSpots() {
+  two.remove(game.handles.legalMoveVertices);
+}
+
 function drawMoveableSpots(fromCoord, edgeLength) {
   const points = [];
   const radius = isMobile ? edgeLength / 3 : edgeLength / 8;
@@ -316,6 +322,8 @@ function drawMoveableSpots(fromCoord, edgeLength) {
       p.opacity = 1;
       two.update();
     });
+
+    // @todo this click leads to a major game state check. Consider making that routine a callback
     p._renderer.elem.addEventListener("click", function () {
       const { anchor } = game.boxes.pitch;
       const lastPoint = game.model.pointList[game.model.pointList.length - 1];
@@ -325,7 +333,13 @@ function drawMoveableSpots(fromCoord, edgeLength) {
         y: (p.translation.y - anchor.y) / edgeLength,
       };
 
-      testForVictory(newPoint);
+      // @todo is this necessary, really?
+      // really make sure that no one has won yet.
+      if (game.model.winner) {
+        return;
+      }
+
+      checkVictoryState(newPoint);
 
       const lastPointKey = getCoordKey(lastPoint);
       const newPointKey = getCoordKey(newPoint);
@@ -342,36 +356,44 @@ function drawMoveableSpots(fromCoord, edgeLength) {
         game.model.edgeMap[lastPointKey].push(newPointKey);
       }
 
-      renderPath(edgeLength);
+      renderPlayerGraphics(edgeLength);
     });
   });
 
   // remove old circles from the pitch
-  two.remove(game.handles.legalMoveVertices);
+  eraseMoveableSpots();
+
   game.handles.legalMoveVertices = [...filteredPoints];
 }
 
-function getCoordKey(point) {
-  return `${point.x}-${point.y}`;
-}
-
-function renderPath(edgeLength) {
-  const currentPoint = game.model.pointList[game.model.pointList.length - 1];
+function drawCurrentSpot(currentPoint, edgeLength) {
   const { anchor } = game.boxes.pitch;
-
-  drawLinePath(game.model.pointList, edgeLength);
   two.remove(game.handles.currentPositionDot);
-  drawMoveableSpots(currentPoint, edgeLength);
   game.handles.currentPositionDot = two.makeCircle(
     anchor.x + currentPoint.x * edgeLength,
     anchor.y + currentPoint.y * edgeLength,
     edgeLength / 5
   );
   game.handles.currentPositionDot.fill = "yellow";
+}
+
+function renderPlayerGraphics(edgeLength) {
+  const currentPoint = game.model.pointList[game.model.pointList.length - 1];
+
+  drawLinePath(game.model.pointList, edgeLength);
+  drawCurrentSpot(currentPoint, edgeLength);
+
+  if (game.model.winner === "1" || game.model.winner === "2") {
+    eraseMoveableSpots();
+    two.update();
+    alert(game.model.winner);
+  } else {
+    drawMoveableSpots(currentPoint, edgeLength);
+  }
   two.update();
 }
 
-function testForVictory(point) {
+function checkVictoryState(point) {
   // make sure this is legal
 
   // test for player 1 victory

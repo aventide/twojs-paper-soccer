@@ -6,13 +6,15 @@ import {
   DEFAULT_PADDING_Y,
   DEFAULT_CONFIG,
   INITIAL_GAME_MODEL,
+  PLAYER_ONE,
+  PLAYER_TWO,
 } from "./constants";
 
-import { getCoordKey } from "./util";
+import { getCoordKey, areCoordsEqual } from "./util";
 
 const isMobile = mobilecheck();
 if (isMobile) {
-  alert("Mobile Device Detected.");
+  // alert("Mobile Device Detected.");
 }
 
 window.addEventListener("resize", function () {
@@ -37,7 +39,7 @@ function drawResponsivePitch() {
   const { innerWidth, innerHeight } = window;
 
   // in the future, let's probably just display a "height is too small" message in css
-  if (innerWidth <= 700 || isMobile) {
+  if (innerWidth <= 440 || isMobile) {
     if (innerHeight >= innerWidth) {
       two.width = innerWidth;
       two.height = innerWidth * 1.25;
@@ -340,6 +342,7 @@ function drawMoveableSpots(fromCoord, edgeLength) {
       }
 
       checkVictoryState(newPoint);
+      checkTurnForState(newPoint);
 
       const lastPointKey = getCoordKey(lastPoint);
       const newPointKey = getCoordKey(newPoint);
@@ -386,7 +389,6 @@ function renderPlayerGraphics(edgeLength) {
   if (game.model.winner === "1" || game.model.winner === "2") {
     eraseMoveableSpots();
     two.update();
-    alert(game.model.winner);
   } else {
     drawMoveableSpots(currentPoint, edgeLength);
   }
@@ -398,9 +400,24 @@ function checkVictoryState(point) {
 
   // test for player 1 victory
   if (point.y <= 0) {
-    game.model.winner = "1";
+    game.model.winner = PLAYER_ONE;
     // test for player 2 victory
   } else if (point.y >= NUMBER_ROWS) {
-    game.model.winner = "2";
+    game.model.winner = PLAYER_TWO;
   }
+}
+
+function checkTurnForState(newPoint) {
+  console.log(game.model.pointList);
+
+  // object equality....right...
+  if (!game.model.pointList.some((p) => areCoordsEqual(newPoint, p))) {
+    game.model.turnFor = Number(!Boolean(game.model.turnFor));
+    drawActiveTurnPerson();
+  }
+}
+
+function drawActiveTurnPerson() {
+  const drawElem = document.querySelector("#turn");
+  drawElem.innerText = game.model.turnFor;
 }

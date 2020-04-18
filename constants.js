@@ -4,7 +4,9 @@ const NUMBER_COLS = 8;
 const DEFAULT_PADDING_Y = 20;
 const DEFAULT_PADDING_X = 16;
 
-const DEFAULT_CONFIG = { width: 700, height: 875 };
+// this is a bit big on desktop
+// const DEFAULT_CONFIG = { width: 700, height: 875 };
+const DEFAULT_CONFIG = { width: 440, height: 550 };
 
 // this might be useless, if we ALWAYS dynamically calculate this.
 // const DEFAULT_EDGE_LENGTH = DEFAULT_CONFIG.width / NUMBER_COLS;
@@ -23,6 +25,9 @@ const INITIAL_HANDLES = {
   pitchBorders: null,
 };
 
+const PLAYER_ONE = 0;
+const PLAYER_TWO = 1;
+
 const INITIAL_GAME_MODEL = {
   boxes: {
     pitch: {
@@ -40,6 +45,7 @@ const INITIAL_GAME_MODEL = {
     pointList: [INITIAL_CENTERPOINT],
     edgeMap: { [`${INITIAL_CENTERPOINT.x}-${INITIAL_CENTERPOINT.y}`]: [] },
     winner: null,
+    turnFor: PLAYER_ONE,
   },
   handles: { ...INITIAL_HANDLES },
 };
@@ -51,4 +57,6 @@ export {
   DEFAULT_PADDING_Y,
   DEFAULT_CONFIG,
   INITIAL_GAME_MODEL,
+  PLAYER_ONE,
+  PLAYER_TWO,
 };

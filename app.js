@@ -75,6 +75,8 @@ function drawResponsivePitch() {
   };
 
   drawPitch(game.boxes.pitch);
+
+  drawActiveTurnPerson();
 }
 
 drawResponsivePitch();
@@ -386,8 +388,9 @@ function renderPlayerGraphics(edgeLength) {
   drawLinePath(game.model.pointList, edgeLength);
   drawCurrentSpot(currentPoint, edgeLength);
 
-  if (game.model.winner === "1" || game.model.winner === "2") {
+  if (game.model.winner === PLAYER_ONE || game.model.winner === PLAYER_TWO) {
     eraseMoveableSpots();
+    drawInfo(INFO_PRIMARY, `Player ${game.model.winner + 1} wins the game!`);
     two.update();
   } else {
     drawMoveableSpots(currentPoint, edgeLength);
@@ -410,14 +413,30 @@ function checkVictoryState(point) {
 function checkTurnForState(newPoint) {
   console.log(game.model.pointList);
 
+  // @todo add edges/vertices for the pitch. Those don't currently bounce.
+
   // object equality....right...
   if (!game.model.pointList.some((p) => areCoordsEqual(newPoint, p))) {
     game.model.turnFor = Number(!Boolean(game.model.turnFor));
-    drawActiveTurnPerson();
+    drawActiveTurnPerson(false);
+  } else {
+    drawActiveTurnPerson(true);
   }
 }
 
-function drawActiveTurnPerson() {
-  const drawElem = document.querySelector("#turn");
-  drawElem.innerText = game.model.turnFor;
+const INFO_PRIMARY = "info-primary";
+function drawInfo(element, text) {
+  const InfoPanelIdMap = {
+    [INFO_PRIMARY]: "turn",
+  };
+
+  const drawElem = document.querySelector(`#${InfoPanelIdMap[element]}`);
+  drawElem.innerText = text;
+}
+
+function drawActiveTurnPerson(isBouncing) {
+  const statusText =
+    (game.model.turnFor ? "Player 2" : "Player 1") +
+    (isBouncing ? ", go again now!" : "");
+  drawInfo(INFO_PRIMARY, statusText);
 }

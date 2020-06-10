@@ -16,6 +16,13 @@ main {
   background-color: white;
 }
 
+#info-primary,
+#app,
+#info-secondary {
+  border-left: 3px solid red;
+  border-right: 3px solid red;
+}
+
 #info-primary {
   height: 50px;
   width: 100%;

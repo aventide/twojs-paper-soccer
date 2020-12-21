@@ -17,8 +17,7 @@
     "url": "https://github.com/misterlocations/twojs-paper-soccer/issues"
   },
   "homepage": "https://github.com/misterlocations/twojs-paper-soccer#readme",
-  "dependencies": {
-    "node-sass": "^4.13.1",
+  "devDependencies": {
     "parcel-bundler": "^1.12.4"
   }
 }

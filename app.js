@@ -1,4 +1,3 @@
-import mobilecheck from "./util/mobilecheck";
 import {
   NUMBER_ROWS,
   NUMBER_COLS,
@@ -8,9 +7,10 @@ import {
   INITIAL_GAME_MODEL,
   PLAYER_ONE,
   PLAYER_TWO,
+  INFO_PRIMARY,
 } from "./constants";
 
-import { getCoordKey, areCoordsEqual } from "./util";
+import { getCoordKey, areCoordsEqual, mobilecheck} from "./util";
 
 const isMobile = mobilecheck();
 if (isMobile) {
@@ -424,7 +424,6 @@ function checkTurnForState(newPoint) {
   }
 }
 
-const INFO_PRIMARY = "info-primary";
 function drawInfo(element, text) {
   const InfoPanelIdMap = {
     [INFO_PRIMARY]: "turn",

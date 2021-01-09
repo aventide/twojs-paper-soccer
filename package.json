@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "test",
-    "dev:start": "parcel index.html"
+    "start": "snowpack dev"
   },
   "repository": {
     "type": "git",
@@ -18,6 +18,9 @@
   },
   "homepage": "https://github.com/misterlocations/twojs-paper-soccer#readme",
   "devDependencies": {
-    "parcel-bundler": "^1.12.4"
+    "snowpack": "^2.18.5"
+  },
+  "dependencies": {
+    "two.js": "^0.7.0-stable.1"
   }
 }

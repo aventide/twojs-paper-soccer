@@ -16,6 +16,8 @@ const INITIAL_CENTERPOINT = {
   y: NUMBER_ROWS / 2,
 };
 
+const INFO_PRIMARY = "info-primary";
+
 const INITIAL_HANDLES = {
   edges: [],
   legalMoveVertices: [],
@@ -59,4 +61,5 @@ export {
   INITIAL_GAME_MODEL,
   PLAYER_ONE,
   PLAYER_TWO,
+  INFO_PRIMARY
 };

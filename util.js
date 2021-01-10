@@ -6,7 +6,7 @@ function areCoordsEqual(point1, point2) {
   return getCoordKey(point1) === getCoordKey(point2);
 }
 
-function getLineSegments(startPoint, endPoint){
+function getLineSegments(startPoint, endPoint, edgeLength=1){
   
   // the axis that will be changing
   const [axis, fixed] = startPoint.x - endPoint.x === 0 ? ['y', 'x'] : ['x', 'y'];

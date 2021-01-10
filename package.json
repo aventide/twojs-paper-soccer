@@ -4,7 +4,7 @@
   "description": "The game of paper soccer on the web",
   "main": "index.js",
   "scripts": {
-    "test": "test",
+    "test": "wtr test/**/*.test.js --node-resolve --watch",
     "start": "snowpack dev"
   },
   "repository": {
@@ -18,7 +18,10 @@
   },
   "homepage": "https://github.com/misterlocations/twojs-paper-soccer#readme",
   "devDependencies": {
-    "snowpack": "^2.18.5"
+    "@snowpack/web-test-runner-plugin": "^0.1.5",
+    "@web/test-runner": "^0.12.1",
+    "snowpack": "^2.18.5",
+    "@esm-bundle/chai": "^4.1.5"
   },
   "dependencies": {
     "two.js": "^0.7.0-stable.1"

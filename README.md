@@ -8,10 +8,10 @@ The game of paper soccer, usually played IRL on graph paper. Except this time, p
 
 ### Setup:
 
-1. Install `parcel-bundler` and `node-sass` from npm. Keep in mind that node-sass should be installed locally.
+yarn install
+yarn start
 
-2. Run `parcel index.html`.
-
+See 'Possible Issues' below if running on Apple Silicon machines causes issues
 ## Game Lifecycle
 
 1. Initial config
@@ -42,3 +42,10 @@ The game of paper soccer, usually played IRL on graph paper. Except this time, p
    - Record the victory (TBD - stub this for now)
    - Display victory graphic of some sort.
    - Allow player to start a new game.
+
+## Possible Issues:
+
+// node_modules/puppeteer-core/lib/cjs/puppeteer/node/Launcher.js L:73
+if (os.arch() === 'arm64' && false) {
+    chromeExecutable = '/usr/bin/chromium-browser';
+}

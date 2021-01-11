@@ -10,7 +10,7 @@ import {
   INFO_PRIMARY,
 } from "./constants";
 
-import { getCoordKey, areCoordsEqual, mobilecheck} from "./util";
+import { getCoordKey, areCoordsEqual, getPitchEdges, mobilecheck} from "./util";
 
 const isMobile = mobilecheck();
 if (isMobile) {
@@ -85,7 +85,24 @@ function drawPitch(pitch) {
   // this might be an ugly float, but seems to be fine for now...
   const edgeLength = (pitch.end.x - pitch.anchor.x) / NUMBER_COLS;
 
+  // @todo is this necessary?
   two.clear();
+
+  // @todo generate coordinates for edges at 'base level' instead of real pixel level.
+  // THEN apply real measurements.
+  const pitchEdges = getPitchEdges(NUMBER_COLS, NUMBER_ROWS)
+  pitchEdges.forEach(edge => {
+    // these two work but they clash
+    if(game.model.edgeMap[getCoordKey(edge[0])]?.length){
+      game.model.edgeMap[getCoordKey(edge[0])].push(getCoordKey(edge[1]));
+    } else {
+      game.model.edgeMap[getCoordKey(edge[0])] = [getCoordKey(edge[1])];
+    }
+    if(game.model.edgeMap[getCoordKey(edge[1])]?.length){
+      game.model.edgeMap[getCoordKey(edge[1])].push(getCoordKey(edge[0]));
+    } else {
+      game.model.edgeMap[getCoordKey(edge[1])] = [getCoordKey(edge[0])];
+    }  })
 
   // @TODO start adapting here, using the pitch argument
   // do we really need both of these args though? They seem really global...refactor this later, you asshole.
@@ -132,7 +149,6 @@ function getCenterPoint() {
 }
 
 function drawPitchBorders(box, edgeLength) {
-  const segments = [];
   const { anchor, end } = box;
 
   // get horizontal center
@@ -141,83 +157,102 @@ function drawPitchBorders(box, edgeLength) {
   // get half-height
   const heightBound = end.y;
   // draw goal ends
-  segments.push(
+  const segments = [
     // top end
 
-    two.makeLine(
+    [
       centerpointX - edgeLength,
       anchor.y,
       centerpointX + edgeLength,
       anchor.y
-    ),
-    two.makeLine(
+    ],
+    [
       centerpointX - edgeLength,
       anchor.y,
       centerpointX - edgeLength,
       anchor.y + edgeLength
-    ),
-    two.makeLine(
+    ],
+    [
       centerpointX + edgeLength,
       anchor.y,
       centerpointX + edgeLength,
       anchor.y + edgeLength
-    ),
+    ],
 
-    two.makeLine(
+    [
       centerpointX - edgeLength,
       anchor.y + edgeLength,
       anchor.x,
       anchor.y + edgeLength
-    ),
-    two.makeLine(
+    ],
+    [
       centerpointX + edgeLength,
       anchor.y + edgeLength,
       end.x,
       anchor.y + edgeLength
-    ),
+    ],
 
     // bottom end
 
-    two.makeLine(
+    [
       centerpointX - edgeLength,
       heightBound,
       centerpointX + edgeLength,
       heightBound
-    ),
-    two.makeLine(
+    ],
+    [
       centerpointX - edgeLength,
       heightBound,
       centerpointX - edgeLength,
       heightBound - edgeLength
-    ),
-    two.makeLine(
+    ],
+    [
       centerpointX + edgeLength,
       heightBound,
       centerpointX + edgeLength,
       heightBound - edgeLength
-    ),
+    ],
 
-    two.makeLine(
+    [
       centerpointX - edgeLength,
       heightBound - edgeLength,
       anchor.x,
       heightBound - edgeLength
-    ),
-    two.makeLine(
+    ],
+    [
       centerpointX + edgeLength,
       heightBound - edgeLength,
       end.x,
       heightBound - edgeLength
-    ),
+    ],
 
     // sides
 
-    two.makeLine(anchor.x, anchor.y + edgeLength, anchor.x, end.y - edgeLength),
-    two.makeLine(end.x, anchor.y + edgeLength, end.x, end.y - edgeLength)
-  );
+    [anchor.x, anchor.y + edgeLength, anchor.x, end.y - edgeLength],
+    [end.x, anchor.y + edgeLength, end.x, end.y - edgeLength]
+  ];
 
-  segments.forEach((s) => (s.linewidth = 3));
-  return segments;
+  // will need to do the initial edges at "base level" without edgelength
+
+  // const edges = segments.map(s => [{x: s[0], y: s[1]}, {x: s[2], y: s[3]}])
+  // edges.forEach(edge => {
+  //   const edgeSections = getLineSegments(edge[0], edge[1])
+
+  //   const edgeSectionsReverse = edgeSections.reverse();
+
+  //   for(let i = 0; i < edgeSections.length - 2; i++){
+  //     game.model.edgeMap[getCoordKey(edgeSections[i] = getCoordKey(edgeSections[i + 1]))]
+  //   }
+
+  //   for(let i = 0; i < edgeSectionsReverse.length - 2; i++){
+  //     game.model.edgeMap[getCoordKey(edgeSectionsReverse[i] = getCoordKey(edgeSectionsReverse[i + 1]))]
+  //   }
+
+  // })
+
+  const handles = segments.map(s => two.makeLine(s[0], s[1], s[2], s[3]))
+  handles.forEach((s) => (s.linewidth = 3));
+  return handles;
 }
 
 function drawStartDot(box, edgeLength) {

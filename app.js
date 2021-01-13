@@ -302,9 +302,16 @@ function drawMoveableSpots(edgeLength) {
       // this eliminates the need to destroy the circles at the end of game, but we might as well...
       // the next rule might also eliminate the need for this...
       const isPointNotInGoalEnd = currentPoint.y > 0 && currentPoint.y < heightBound;
-
-      const isPointBouncingOffTopWall = currentPoint.y > 1 || (point.y === 0 ? 
-      (point.x >= centerpointX - 1 && point.x <= centerpointX + 1 && (currentPoint.x !== point.x || currentPoint.x === centerpointX)) : true)
+      
+      const isPointBouncingOffTopWall = currentPoint.y > 1 || (point.y === 0 ? (
+        (currentPoint.x === centerpointX ) ||
+        (currentPoint.x === centerpointX -1 || currentPoint.x === centerpointX + 1) && point.x === centerpointX
+      ) : (
+        (point.y > 1) ||
+         point.x === centerpointX ||
+         currentPoint.x === centerpointX
+      ))
+      
       const isPointNotOnExistingEdge = ((!compare || !compare.includes(getCoordKey(currentPoint))));
 
       return isPointNotInGoalEnd && isPointBouncingOffSideWalls && isPointNotOnExistingEdge && isPointBouncingOffTopWall;
@@ -346,6 +353,7 @@ function drawMoveableSpots(edgeLength) {
       const { anchor } = game.boxes.pitch;
       const lastPoint = game.model.pointList[game.model.pointList.length - 1];
 
+      // @todo ew, we really should use the raw point values, then rendering.
       const newPoint = {
         x: (p._translation.x - anchor.x) / edgeLength,
         y: (p.translation.y - anchor.y) / edgeLength,

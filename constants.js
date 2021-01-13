@@ -51,6 +51,7 @@ const INITIAL_GAME_MODEL = {
     edgeMap: INITIAL_EDGE_MAP,
     winner: null,
     turnFor: PLAYER_ONE,
+    forbiddenEdgeMap: {},
   },
   handles: { ...INITIAL_HANDLES },
 };

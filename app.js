@@ -10,7 +10,7 @@ import {
   INFO_PRIMARY,
 } from "./constants";
 
-import { getCoordKey, areCoordsEqual, getPitchEdges, mobilecheck} from "./util";
+import { getCoordKey, areCoordsEqual, getPitchEdges, mobilecheck } from "./util";
 
 const isMobile = mobilecheck();
 if (isMobile) {
@@ -93,16 +93,20 @@ function drawPitch(pitch) {
   const pitchEdges = getPitchEdges(NUMBER_COLS, NUMBER_ROWS)
   pitchEdges.forEach(edge => {
     // these two work but they clash
-    if(game.model.edgeMap[getCoordKey(edge[0])]?.length){
-      game.model.edgeMap[getCoordKey(edge[0])].push(getCoordKey(edge[1]));
+    if (game.model.forbiddenEdgeMap[getCoordKey(edge[0])]?.length) {
+      game.model.forbiddenEdgeMap[getCoordKey(edge[0])].push(getCoordKey(edge[1]));
     } else {
-      game.model.edgeMap[getCoordKey(edge[0])] = [getCoordKey(edge[1])];
+      game.model.forbiddenEdgeMap[getCoordKey(edge[0])] = [getCoordKey(edge[1])];
     }
-    if(game.model.edgeMap[getCoordKey(edge[1])]?.length){
-      game.model.edgeMap[getCoordKey(edge[1])].push(getCoordKey(edge[0]));
+    if (game.model.forbiddenEdgeMap[getCoordKey(edge[1])]?.length) {
+      game.model.forbiddenEdgeMap[getCoordKey(edge[1])].push(getCoordKey(edge[0]));
     } else {
-      game.model.edgeMap[getCoordKey(edge[1])] = [getCoordKey(edge[0])];
-    }  })
+      game.model.forbiddenEdgeMap[getCoordKey(edge[1])] = [getCoordKey(edge[0])];
+    }
+  })
+
+  // add diagonal edges from goal ends
+
 
   // @TODO start adapting here, using the pitch argument
   // do we really need both of these args though? They seem really global...refactor this later, you asshole.
@@ -232,24 +236,6 @@ function drawPitchBorders(box, edgeLength) {
     [end.x, anchor.y + edgeLength, end.x, end.y - edgeLength]
   ];
 
-  // will need to do the initial edges at "base level" without edgelength
-
-  // const edges = segments.map(s => [{x: s[0], y: s[1]}, {x: s[2], y: s[3]}])
-  // edges.forEach(edge => {
-  //   const edgeSections = getLineSegments(edge[0], edge[1])
-
-  //   const edgeSectionsReverse = edgeSections.reverse();
-
-  //   for(let i = 0; i < edgeSections.length - 2; i++){
-  //     game.model.edgeMap[getCoordKey(edgeSections[i] = getCoordKey(edgeSections[i + 1]))]
-  //   }
-
-  //   for(let i = 0; i < edgeSectionsReverse.length - 2; i++){
-  //     game.model.edgeMap[getCoordKey(edgeSectionsReverse[i] = getCoordKey(edgeSectionsReverse[i + 1]))]
-  //   }
-
-  // })
-
   const handles = segments.map(s => two.makeLine(s[0], s[1], s[2], s[3]))
   handles.forEach((s) => (s.linewidth = 3));
   return handles;
@@ -307,50 +293,56 @@ function eraseMoveableSpots() {
 }
 
 function drawMoveableSpots(fromCoord, edgeLength) {
-  const points = [];
   const radius = isMobile ? edgeLength / 3 : edgeLength / 8;
   const heightBound = NUMBER_ROWS;
   const widthBound = NUMBER_COLS;
-  const horizontalCenter = widthBound / 2;
 
-  function makeCircleConditionally(x, y, radius) {
-    // restrict movement off shoulders of the pitch
-    if (y < 1 || y > heightBound - 1) {
-      if (x < horizontalCenter - 1 || x > horizontalCenter + 1) {
-        return null;
-      }
-    }
+  function getLegalMoves(currentPoint) {
 
-    const currentPoint = game.model.pointList[game.model.pointList.length - 1];
-    const { anchor } = game.boxes.pitch;
+    // the points one unit in all directions around current point
+    const possibleMovePoints = [
+      { x: currentPoint.x - 1, y: currentPoint.y },
+      { x: currentPoint.x + 1, y: currentPoint.y },
+      { x: currentPoint.x, y: currentPoint.y - 1 },
+      { x: currentPoint.x, y: currentPoint.y + 1 },
+      { x: currentPoint.x - 1, y: currentPoint.y - 1 },
+      { x: currentPoint.x - 1, y: currentPoint.y + 1 },
+      { x: currentPoint.x + 1, y: currentPoint.y + 1 },
+      { x: currentPoint.x + 1, y: currentPoint.y - 1 }
+    ];
 
-    const key = getCoordKey({ x, y });
-    const compare = game.model.edgeMap[key];
-    if (!compare || !compare.includes(getCoordKey(currentPoint))) {
-      return two.makeCircle(
-        anchor.x + x * edgeLength,
-        anchor.y + y * edgeLength,
-        radius
-      );
-    }
+    const legalMovePoints = possibleMovePoints.filter(point => {
+      const key = getCoordKey({ x: point.x, y: point.y });
+      const compare = game.model.edgeMap[key];
+      const forbiddenEdges = game.model.forbiddenEdgeMap[key];
+
+      const isPointInBasicBounds = point.x >= 0 && point.x <= widthBound && point.y >= 0 && point.y <= heightBound;
+      const isPointBouncingOffSideWalls = (currentPoint.x > 0 || point.x > 0) && (currentPoint.x < widthBound || point.x < widthBound)
+      const isPointNotOnExistingEdge = ((!compare || !compare.includes(getCoordKey(currentPoint))) && (!forbiddenEdges || !forbiddenEdges.includes(getCoordKey(currentPoint))));
+
+      return isPointInBasicBounds && isPointBouncingOffSideWalls && isPointNotOnExistingEdge;
+    });
+
+    return legalMovePoints;
   }
 
-  points.push(
-    makeCircleConditionally(fromCoord.x - 1, fromCoord.y, radius),
-    makeCircleConditionally(fromCoord.x + 1, fromCoord.y, radius),
-    makeCircleConditionally(fromCoord.x, fromCoord.y - 1, radius),
-    makeCircleConditionally(fromCoord.x, fromCoord.y + 1, radius),
-    makeCircleConditionally(fromCoord.x - 1, fromCoord.y - 1, radius),
-    makeCircleConditionally(fromCoord.x - 1, fromCoord.y + 1, radius),
-    makeCircleConditionally(fromCoord.x + 1, fromCoord.y + 1, radius),
-    makeCircleConditionally(fromCoord.x + 1, fromCoord.y - 1, radius)
-  );
+  const currentPoint = game.model.pointList[game.model.pointList.length - 1];
 
-  const filteredPoints = points.filter((p) => p);
+  const points = getLegalMoves(currentPoint);
+
+  const renderedPoints = [];
+  const {anchor} = game.boxes.pitch;
+  points.forEach(point => {
+    renderedPoints.push(two.makeCircle(
+      anchor.x + point.x * edgeLength,
+      anchor.y + point.y * edgeLength,
+      radius
+    ))
+  });
 
   two.update();
 
-  filteredPoints.forEach((p) => {
+  renderedPoints.forEach((p) => {
     p._renderer.elem.addEventListener("mouseover", function () {
       p.fill = "lightblue";
       p.opacity = 0.6;
@@ -403,7 +395,7 @@ function drawMoveableSpots(fromCoord, edgeLength) {
   // remove old circles from the pitch
   eraseMoveableSpots();
 
-  game.handles.legalMoveVertices = [...filteredPoints];
+  game.handles.legalMoveVertices = [...renderedPoints];
 }
 
 function drawCurrentSpot(currentPoint, edgeLength) {

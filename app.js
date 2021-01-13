@@ -88,27 +88,6 @@ function drawPitch(pitch) {
   // @todo is this necessary?
   two.clear();
 
-  // @todo generate coordinates for edges at 'base level' instead of real pixel level.
-  // THEN apply real measurements.
-  const pitchEdges = getPitchEdges(NUMBER_COLS, NUMBER_ROWS)
-  pitchEdges.forEach(edge => {
-    // these two work but they clash
-    if (game.model.forbiddenEdgeMap[getCoordKey(edge[0])]?.length) {
-      game.model.forbiddenEdgeMap[getCoordKey(edge[0])].push(getCoordKey(edge[1]));
-    } else {
-      game.model.forbiddenEdgeMap[getCoordKey(edge[0])] = [getCoordKey(edge[1])];
-    }
-    if (game.model.forbiddenEdgeMap[getCoordKey(edge[1])]?.length) {
-      game.model.forbiddenEdgeMap[getCoordKey(edge[1])].push(getCoordKey(edge[0]));
-    } else {
-      game.model.forbiddenEdgeMap[getCoordKey(edge[1])] = [getCoordKey(edge[0])];
-    }
-  })
-
-  // add diagonal edges from goal ends
-
-
-  // @TODO start adapting here, using the pitch argument
   // do we really need both of these args though? They seem really global...refactor this later, you asshole.
   game.handles.graphPaper = drawGraphPaper(pitch, edgeLength);
   game.handles.pitchBorders = drawPitchBorders(pitch, edgeLength);
@@ -292,10 +271,11 @@ function eraseMoveableSpots() {
   two.remove(game.handles.legalMoveVertices);
 }
 
-function drawMoveableSpots(fromCoord, edgeLength) {
+function drawMoveableSpots(edgeLength) {
   const radius = isMobile ? edgeLength / 3 : edgeLength / 8;
   const heightBound = NUMBER_ROWS;
   const widthBound = NUMBER_COLS;
+  const centerpointX = widthBound / 2;
 
   function getLegalMoves(currentPoint) {
 
@@ -314,13 +294,20 @@ function drawMoveableSpots(fromCoord, edgeLength) {
     const legalMovePoints = possibleMovePoints.filter(point => {
       const key = getCoordKey({ x: point.x, y: point.y });
       const compare = game.model.edgeMap[key];
-      const forbiddenEdges = game.model.forbiddenEdgeMap[key];
 
-      const isPointInBasicBounds = point.x >= 0 && point.x <= widthBound && point.y >= 0 && point.y <= heightBound;
+      // this might be redundant, considering we have the next rules
+      // const isPointInBasicBounds = point.x >= 0 && point.x <= widthBound && point.y >= 0 && point.y <= heightBound;
       const isPointBouncingOffSideWalls = (currentPoint.x > 0 || point.x > 0) && (currentPoint.x < widthBound || point.x < widthBound)
-      const isPointNotOnExistingEdge = ((!compare || !compare.includes(getCoordKey(currentPoint))) && (!forbiddenEdges || !forbiddenEdges.includes(getCoordKey(currentPoint))));
+      
+      // this eliminates the need to destroy the circles at the end of game, but we might as well...
+      // the next rule might also eliminate the need for this...
+      const isPointNotInGoalEnd = currentPoint.y > 0 && currentPoint.y < heightBound;
 
-      return isPointInBasicBounds && isPointBouncingOffSideWalls && isPointNotOnExistingEdge;
+      const isPointBouncingOffTopWall = currentPoint.y > 1 || (point.y === 0 ? 
+      (point.x >= centerpointX - 1 && point.x <= centerpointX + 1 && (currentPoint.x !== point.x || currentPoint.x === centerpointX)) : true)
+      const isPointNotOnExistingEdge = ((!compare || !compare.includes(getCoordKey(currentPoint))));
+
+      return isPointNotInGoalEnd && isPointBouncingOffSideWalls && isPointNotOnExistingEdge && isPointBouncingOffTopWall;
     });
 
     return legalMovePoints;
@@ -331,7 +318,7 @@ function drawMoveableSpots(fromCoord, edgeLength) {
   const points = getLegalMoves(currentPoint);
 
   const renderedPoints = [];
-  const {anchor} = game.boxes.pitch;
+  const { anchor } = game.boxes.pitch;
   points.forEach(point => {
     renderedPoints.push(two.makeCircle(
       anchor.x + point.x * edgeLength,
@@ -420,7 +407,7 @@ function renderPlayerGraphics(edgeLength) {
     drawInfo(INFO_PRIMARY, `Player ${game.model.winner + 1} wins the game!`);
     two.update();
   } else {
-    drawMoveableSpots(currentPoint, edgeLength);
+    drawMoveableSpots(edgeLength);
   }
   two.update();
 }

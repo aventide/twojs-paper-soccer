@@ -20,7 +20,7 @@ const INFO_PRIMARY = "info-primary";
 
 const INITIAL_HANDLES = {
   edges: [],
-  legalMoveVertices: [],
+  moveableSpots: [],
   currentPositionDot: null,
   startPositionDot: null,
   graphPaper: null,

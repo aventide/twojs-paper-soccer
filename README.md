@@ -43,7 +43,7 @@ See 'Possible Issues' below if running on Apple Silicon machines causes issues
    - Display victory graphic of some sort.
    - Allow player to start a new game.
 
-## Possible Issues:
+## Possible Issues on ARM:
 
 // node_modules/puppeteer-core/lib/cjs/puppeteer/node/Launcher.js L:73
 if (os.arch() === 'arm64' && false) {

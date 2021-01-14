@@ -4,7 +4,7 @@ const NUMBER_COLS = 8;
 const DEFAULT_PADDING_Y = 20;
 const DEFAULT_PADDING_X = 16;
 
-// this is a bit big on desktop
+// @todo this is a bit big on desktop
 // const DEFAULT_CONFIG = { width: 700, height: 875 };
 const DEFAULT_CONFIG = { width: 440, height: 550 };
 
@@ -20,7 +20,7 @@ const INFO_PRIMARY = "info-primary";
 
 const INITIAL_HANDLES = {
   edges: [],
-  legalMoveVertices: [],
+  moveableSpots: [],
   currentPositionDot: null,
   startPositionDot: null,
   graphPaper: null,
@@ -29,6 +29,9 @@ const INITIAL_HANDLES = {
 
 const PLAYER_ONE = 0;
 const PLAYER_TWO = 1;
+
+// edgeMap is the list of edges that already exist, and cannot be drawn on.
+const INITIAL_EDGE_MAP = { [`${INITIAL_CENTERPOINT.x}-${INITIAL_CENTERPOINT.y}`]: [] }
 
 const INITIAL_GAME_MODEL = {
   boxes: {
@@ -45,7 +48,7 @@ const INITIAL_GAME_MODEL = {
   },
   model: {
     pointList: [INITIAL_CENTERPOINT],
-    edgeMap: { [`${INITIAL_CENTERPOINT.x}-${INITIAL_CENTERPOINT.y}`]: [] },
+    edgeMap: INITIAL_EDGE_MAP,
     winner: null,
     turnFor: PLAYER_ONE,
   },

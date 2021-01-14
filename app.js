@@ -10,7 +10,7 @@ import {
   INFO_PRIMARY,
 } from "./constants";
 
-import { getCoordKey, areCoordsEqual, mobilecheck} from "./util";
+import { getCoordKey, areCoordsEqual, getPitchEdges, mobilecheck } from "./util";
 
 const isMobile = mobilecheck();
 if (isMobile) {
@@ -85,9 +85,9 @@ function drawPitch(pitch) {
   // this might be an ugly float, but seems to be fine for now...
   const edgeLength = (pitch.end.x - pitch.anchor.x) / NUMBER_COLS;
 
+  // @todo is this necessary?
   two.clear();
 
-  // @TODO start adapting here, using the pitch argument
   // do we really need both of these args though? They seem really global...refactor this later, you asshole.
   game.handles.graphPaper = drawGraphPaper(pitch, edgeLength);
   game.handles.pitchBorders = drawPitchBorders(pitch, edgeLength);
@@ -132,7 +132,6 @@ function getCenterPoint() {
 }
 
 function drawPitchBorders(box, edgeLength) {
-  const segments = [];
   const { anchor, end } = box;
 
   // get horizontal center
@@ -141,83 +140,84 @@ function drawPitchBorders(box, edgeLength) {
   // get half-height
   const heightBound = end.y;
   // draw goal ends
-  segments.push(
+  const segments = [
     // top end
 
-    two.makeLine(
+    [
       centerpointX - edgeLength,
       anchor.y,
       centerpointX + edgeLength,
       anchor.y
-    ),
-    two.makeLine(
+    ],
+    [
       centerpointX - edgeLength,
       anchor.y,
       centerpointX - edgeLength,
       anchor.y + edgeLength
-    ),
-    two.makeLine(
+    ],
+    [
       centerpointX + edgeLength,
       anchor.y,
       centerpointX + edgeLength,
       anchor.y + edgeLength
-    ),
+    ],
 
-    two.makeLine(
+    [
       centerpointX - edgeLength,
       anchor.y + edgeLength,
       anchor.x,
       anchor.y + edgeLength
-    ),
-    two.makeLine(
+    ],
+    [
       centerpointX + edgeLength,
       anchor.y + edgeLength,
       end.x,
       anchor.y + edgeLength
-    ),
+    ],
 
     // bottom end
 
-    two.makeLine(
+    [
       centerpointX - edgeLength,
       heightBound,
       centerpointX + edgeLength,
       heightBound
-    ),
-    two.makeLine(
+    ],
+    [
       centerpointX - edgeLength,
       heightBound,
       centerpointX - edgeLength,
       heightBound - edgeLength
-    ),
-    two.makeLine(
+    ],
+    [
       centerpointX + edgeLength,
       heightBound,
       centerpointX + edgeLength,
       heightBound - edgeLength
-    ),
+    ],
 
-    two.makeLine(
+    [
       centerpointX - edgeLength,
       heightBound - edgeLength,
       anchor.x,
       heightBound - edgeLength
-    ),
-    two.makeLine(
+    ],
+    [
       centerpointX + edgeLength,
       heightBound - edgeLength,
       end.x,
       heightBound - edgeLength
-    ),
+    ],
 
     // sides
 
-    two.makeLine(anchor.x, anchor.y + edgeLength, anchor.x, end.y - edgeLength),
-    two.makeLine(end.x, anchor.y + edgeLength, end.x, end.y - edgeLength)
-  );
+    [anchor.x, anchor.y + edgeLength, anchor.x, end.y - edgeLength],
+    [end.x, anchor.y + edgeLength, end.x, end.y - edgeLength]
+  ];
 
-  segments.forEach((s) => (s.linewidth = 3));
-  return segments;
+  const handles = segments.map(s => two.makeLine(s[0], s[1], s[2], s[3]))
+  handles.forEach((s) => (s.linewidth = 3));
+  return handles;
 }
 
 function drawStartDot(box, edgeLength) {
@@ -268,54 +268,81 @@ function drawLinePath(points, edgeLength) {
 }
 
 function eraseMoveableSpots() {
-  two.remove(game.handles.legalMoveVertices);
+  two.remove(game.handles.moveableSpots);
 }
 
-function drawMoveableSpots(fromCoord, edgeLength) {
-  const points = [];
-  const radius = isMobile ? edgeLength / 3 : edgeLength / 8;
-  const heightBound = NUMBER_ROWS;
-  const widthBound = NUMBER_COLS;
-  const horizontalCenter = widthBound / 2;
+function getLegalMoves(currentPoint) {
 
-  function makeCircleConditionally(x, y, radius) {
-    // restrict movement off shoulders of the pitch
-    if (y < 1 || y > heightBound - 1) {
-      if (x < horizontalCenter - 1 || x > horizontalCenter + 1) {
-        return null;
-      }
-    }
+  // the points one unit in all directions around current point
+  const possibleMovePoints = [
+    { x: currentPoint.x - 1, y: currentPoint.y },
+    { x: currentPoint.x + 1, y: currentPoint.y },
+    { x: currentPoint.x, y: currentPoint.y - 1 },
+    { x: currentPoint.x, y: currentPoint.y + 1 },
+    { x: currentPoint.x - 1, y: currentPoint.y - 1 },
+    { x: currentPoint.x - 1, y: currentPoint.y + 1 },
+    { x: currentPoint.x + 1, y: currentPoint.y + 1 },
+    { x: currentPoint.x + 1, y: currentPoint.y - 1 }
+  ];
 
-    const currentPoint = game.model.pointList[game.model.pointList.length - 1];
-    const { anchor } = game.boxes.pitch;
+  const legalMovePoints = possibleMovePoints.filter(point => {
 
-    const key = getCoordKey({ x, y });
+    const heightBound = NUMBER_ROWS;
+    const widthBound = NUMBER_COLS;
+    const centerpointX = widthBound / 2;
+    const key = getCoordKey({ x: point.x, y: point.y });
     const compare = game.model.edgeMap[key];
-    if (!compare || !compare.includes(getCoordKey(currentPoint))) {
-      return two.makeCircle(
-        anchor.x + x * edgeLength,
-        anchor.y + y * edgeLength,
-        radius
-      );
-    }
-  }
 
-  points.push(
-    makeCircleConditionally(fromCoord.x - 1, fromCoord.y, radius),
-    makeCircleConditionally(fromCoord.x + 1, fromCoord.y, radius),
-    makeCircleConditionally(fromCoord.x, fromCoord.y - 1, radius),
-    makeCircleConditionally(fromCoord.x, fromCoord.y + 1, radius),
-    makeCircleConditionally(fromCoord.x - 1, fromCoord.y - 1, radius),
-    makeCircleConditionally(fromCoord.x - 1, fromCoord.y + 1, radius),
-    makeCircleConditionally(fromCoord.x + 1, fromCoord.y + 1, radius),
-    makeCircleConditionally(fromCoord.x + 1, fromCoord.y - 1, radius)
-  );
+    const isPointBouncingOffSideWalls = (currentPoint.x > 0 || point.x > 0) && (currentPoint.x < widthBound || point.x < widthBound)
 
-  const filteredPoints = points.filter((p) => p);
+    const isPointBouncingOffTopWall = currentPoint.y > 1 || (point.y === 0 ? (
+      (currentPoint.x === centerpointX) ||
+      (currentPoint.x === centerpointX - 1 || currentPoint.x === centerpointX + 1) && point.x === centerpointX
+    ) : (
+        (point.y > 1) ||
+        point.x === centerpointX ||
+        currentPoint.x === centerpointX
+      ))
+
+    const isPointBouncingOffBottomWall = currentPoint.y < heightBound - 1 || (point.y === heightBound ? (
+      (currentPoint.x === centerpointX) ||
+      (currentPoint.x === centerpointX - 1 || currentPoint.x === centerpointX + 1) && point.x === centerpointX
+    ) : (
+        (point.y < heightBound - 1) ||
+        point.x === centerpointX ||
+        currentPoint.x === centerpointX
+      ))
+
+    const isPointNotOnExistingEdge = ((!compare || !compare.includes(getCoordKey(currentPoint))));
+
+    return isPointBouncingOffSideWalls &&
+      isPointNotOnExistingEdge &&
+      isPointBouncingOffTopWall &&
+      isPointBouncingOffBottomWall;
+  });
+
+  return legalMovePoints;
+}
+
+
+function drawMoveableSpots(edgeLength) {
+  const radius = isMobile ? edgeLength / 3 : edgeLength / 8;
+  const currentPoint = game.model.pointList[game.model.pointList.length - 1];
+  const points = getLegalMoves(currentPoint);
+
+  const renderedPoints = [];
+  const { anchor } = game.boxes.pitch;
+  points.forEach(point => {
+    renderedPoints.push(two.makeCircle(
+      anchor.x + point.x * edgeLength,
+      anchor.y + point.y * edgeLength,
+      radius
+    ))
+  });
 
   two.update();
 
-  filteredPoints.forEach((p) => {
+  renderedPoints.forEach((p) => {
     p._renderer.elem.addEventListener("mouseover", function () {
       p.fill = "lightblue";
       p.opacity = 0.6;
@@ -332,6 +359,7 @@ function drawMoveableSpots(fromCoord, edgeLength) {
       const { anchor } = game.boxes.pitch;
       const lastPoint = game.model.pointList[game.model.pointList.length - 1];
 
+      // @todo ew, we really should use the raw point values, then rendering.
       const newPoint = {
         x: (p._translation.x - anchor.x) / edgeLength,
         y: (p.translation.y - anchor.y) / edgeLength,
@@ -367,8 +395,7 @@ function drawMoveableSpots(fromCoord, edgeLength) {
 
   // remove old circles from the pitch
   eraseMoveableSpots();
-
-  game.handles.legalMoveVertices = [...filteredPoints];
+  game.handles.moveableSpots = [...renderedPoints];
 }
 
 function drawCurrentSpot(currentPoint, edgeLength) {
@@ -393,7 +420,7 @@ function renderPlayerGraphics(edgeLength) {
     drawInfo(INFO_PRIMARY, `Player ${game.model.winner + 1} wins the game!`);
     two.update();
   } else {
-    drawMoveableSpots(currentPoint, edgeLength);
+    drawMoveableSpots(edgeLength);
   }
   two.update();
 }

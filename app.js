@@ -10,7 +10,8 @@ import {
   INFO_PRIMARY,
 } from "./constants";
 
-import { getCoordKey, areCoordsEqual, getPitchEdges, mobilecheck } from "./util";
+import { getCoordKey, areCoordsEqual, mobilecheck } from "./util";
+import { getLegalMoves } from './rules';
 
 const isMobile = mobilecheck();
 if (isMobile) {
@@ -271,64 +272,10 @@ function eraseMoveableSpots() {
   two.remove(game.handles.moveableSpots);
 }
 
-function getLegalMoves(currentPoint) {
-
-  // the points one unit in all directions around current point
-  const possibleMovePoints = [
-    { x: currentPoint.x - 1, y: currentPoint.y },
-    { x: currentPoint.x + 1, y: currentPoint.y },
-    { x: currentPoint.x, y: currentPoint.y - 1 },
-    { x: currentPoint.x, y: currentPoint.y + 1 },
-    { x: currentPoint.x - 1, y: currentPoint.y - 1 },
-    { x: currentPoint.x - 1, y: currentPoint.y + 1 },
-    { x: currentPoint.x + 1, y: currentPoint.y + 1 },
-    { x: currentPoint.x + 1, y: currentPoint.y - 1 }
-  ];
-
-  const legalMovePoints = possibleMovePoints.filter(point => {
-
-    const heightBound = NUMBER_ROWS;
-    const widthBound = NUMBER_COLS;
-    const centerpointX = widthBound / 2;
-    const key = getCoordKey({ x: point.x, y: point.y });
-    const compare = game.model.edgeMap[key];
-
-    const isPointBouncingOffSideWalls = (currentPoint.x > 0 || point.x > 0) && (currentPoint.x < widthBound || point.x < widthBound)
-
-    const isPointBouncingOffTopWall = currentPoint.y > 1 || (point.y === 0 ? (
-      (currentPoint.x === centerpointX) ||
-      (currentPoint.x === centerpointX - 1 || currentPoint.x === centerpointX + 1) && point.x === centerpointX
-    ) : (
-        (point.y > 1) ||
-        point.x === centerpointX ||
-        currentPoint.x === centerpointX
-      ))
-
-    const isPointBouncingOffBottomWall = currentPoint.y < heightBound - 1 || (point.y === heightBound ? (
-      (currentPoint.x === centerpointX) ||
-      (currentPoint.x === centerpointX - 1 || currentPoint.x === centerpointX + 1) && point.x === centerpointX
-    ) : (
-        (point.y < heightBound - 1) ||
-        point.x === centerpointX ||
-        currentPoint.x === centerpointX
-      ))
-
-    const isPointNotOnExistingEdge = ((!compare || !compare.includes(getCoordKey(currentPoint))));
-
-    return isPointBouncingOffSideWalls &&
-      isPointNotOnExistingEdge &&
-      isPointBouncingOffTopWall &&
-      isPointBouncingOffBottomWall;
-  });
-
-  return legalMovePoints;
-}
-
-
 function drawMoveableSpots(edgeLength) {
   const radius = isMobile ? edgeLength / 3 : edgeLength / 8;
   const currentPoint = game.model.pointList[game.model.pointList.length - 1];
-  const points = getLegalMoves(currentPoint);
+  const points = getLegalMoves(currentPoint, game.model.edgeMap);
 
   const renderedPoints = [];
   const { anchor } = game.boxes.pitch;

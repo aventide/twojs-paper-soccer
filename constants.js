@@ -53,6 +53,9 @@ const INITIAL_GAME_MODEL = {
     turnFor: PLAYER_ONE,
   },
   handles: { ...INITIAL_HANDLES },
+  renderers: {
+    init: null
+  }
 };
 
 export {

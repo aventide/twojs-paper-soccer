@@ -14,6 +14,12 @@ import { loadCore } from './core';
 import { getCoordKey, areCoordsEqual } from "./util";
 import { getLegalMoves } from './rules';
 
+
+// Global window stuff
+window.addEventListener("resize", function () {
+  drawResponsivePitch();
+});
+
 function drawResponsivePitch() {
   const { innerWidth, innerHeight } = window;
 
@@ -59,8 +65,12 @@ function drawResponsivePitch() {
 }
 
 // ENTRY POINT
+
+// create the game
 const game = loadCore();
 const {two} = game;
+
+// start off with the first render of the pitch
 drawResponsivePitch();
 
 function drawPitch(pitch) {

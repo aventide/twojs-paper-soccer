@@ -12,11 +12,6 @@ function createBox(anchorPoint, endPoint){
 }
 
 export function loadCore() {
-
-    // Global window stuff
-    window.addEventListener("resize", function () {
-      drawResponsivePitch();
-    });
     
     // DOM stuff for Two.js
     const appElem = document.getElementById("app");

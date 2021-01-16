@@ -19,13 +19,14 @@ See 'Possible Issues' below if running on Apple Silicon machines causes issues
    - Mobile detection
    - Dimensions
    - Game model starting values
+   - Assign Rendering functions
 
 2. Draw permanent graphics
 
    - Pitch Edges
    - Graph paper
    - Starting position
-     - includes drawing movement dots for the first time
+   - includes drawing movement dots for the first time
 
 3. Click-Eval-Redraw (LOOP via click handlers)
 

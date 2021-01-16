@@ -3,44 +3,22 @@ import {
   NUMBER_COLS,
   DEFAULT_PADDING_X,
   DEFAULT_PADDING_Y,
-  DEFAULT_CONFIG,
-  INITIAL_GAME_MODEL,
+  DEFAULT_PITCH_DIMENSIONS,
   PLAYER_ONE,
   PLAYER_TWO,
   INFO_PRIMARY,
 } from "./constants";
 
-import { getCoordKey, areCoordsEqual, mobilecheck } from "./util";
+import { loadCore } from './core';
+
+import { getCoordKey, areCoordsEqual } from "./util";
 import { getLegalMoves } from './rules';
-
-const isMobile = mobilecheck();
-if (isMobile) {
-  // alert("Mobile Device Detected.");
-}
-
-window.addEventListener("resize", function () {
-  drawResponsivePitch();
-});
-
-// DOM stuff for Two.js
-const appElem = document.getElementById("app");
-const two = new Two(DEFAULT_CONFIG);
-two.appendTo(appElem);
-
-// boxes: subdvisions of the main canvas specific for this game. Used for placement of main elements
-// model: effective state to base rendering from
-// handles: references to two.js objects after creation, so they can be deleted or manipulated. May not include objects that never need manipulation.
-
-// game state: whose turn it is, whether turn is complete (any possible moves left), path in current turn (if enabled), whether game is won and who won
-const game = {
-  ...INITIAL_GAME_MODEL,
-};
 
 function drawResponsivePitch() {
   const { innerWidth, innerHeight } = window;
 
   // in the future, let's probably just display a "height is too small" message in css
-  if (innerWidth <= 440 || isMobile) {
+  if (innerWidth <= 440) {
     if (innerHeight >= innerWidth) {
       two.width = innerWidth;
       two.height = innerWidth * 1.25;
@@ -49,8 +27,8 @@ function drawResponsivePitch() {
       two.width = innerHeight * 0.8;
     }
   } else {
-    two.width = DEFAULT_CONFIG.width;
-    two.height = DEFAULT_CONFIG.height;
+    two.width = DEFAULT_PITCH_DIMENSIONS.width;
+    two.height = DEFAULT_PITCH_DIMENSIONS.height;
   }
 
   // make function that defines a box within the canvas
@@ -80,6 +58,9 @@ function drawResponsivePitch() {
   drawActiveTurnPerson();
 }
 
+// ENTRY POINT
+const game = loadCore();
+const {two} = game;
 drawResponsivePitch();
 
 function drawPitch(pitch) {
@@ -273,7 +254,7 @@ function eraseMoveableSpots() {
 }
 
 function drawMoveableSpots(edgeLength) {
-  const radius = isMobile ? edgeLength / 3 : edgeLength / 8;
+  const radius = edgeLength / 8;
   const currentPoint = game.model.pointList[game.model.pointList.length - 1];
   const points = getLegalMoves(currentPoint, game.model.edgeMap);
 

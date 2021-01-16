@@ -5,11 +5,11 @@ const DEFAULT_PADDING_Y = 20;
 const DEFAULT_PADDING_X = 16;
 
 // @todo this is a bit big on desktop
-// const DEFAULT_CONFIG = { width: 700, height: 875 };
-const DEFAULT_CONFIG = { width: 440, height: 550 };
+// const DEFAULT_PITCH_DIMENSIONS = { width: 700, height: 875 };
+const DEFAULT_PITCH_DIMENSIONS = { width: 440, height: 550 };
 
 // this might be useless, if we ALWAYS dynamically calculate this.
-// const DEFAULT_EDGE_LENGTH = DEFAULT_CONFIG.width / NUMBER_COLS;
+// const DEFAULT_EDGE_LENGTH = DEFAULT_PITCH_DIMENSIONS.width / NUMBER_COLS;
 
 const INITIAL_CENTERPOINT = {
   x: NUMBER_COLS / 2,
@@ -60,7 +60,7 @@ export {
   NUMBER_COLS,
   DEFAULT_PADDING_X,
   DEFAULT_PADDING_Y,
-  DEFAULT_CONFIG,
+  DEFAULT_PITCH_DIMENSIONS,
   INITIAL_GAME_MODEL,
   PLAYER_ONE,
   PLAYER_TWO,

@@ -3,6 +3,7 @@ import {
     NUMBER_COLS,
     PLAYER_ONE,
     PLAYER_TWO,
+    PITCH_EDGE_POINTS
 } from './constants'
 
 import {
@@ -75,7 +76,7 @@ export function getLegalMoves(currentPoint, edgeMap) {
   
   export function getWhoseTurn(nextPoint, currentPlayer, playedPoints) {
     let whoseTurn = currentPlayer;
-    if (!playedPoints.some((p) => areCoordsEqual(nextPoint, p))) {
+    if (!playedPoints.some((p) => areCoordsEqual(nextPoint, p)) && !PITCH_EDGE_POINTS.some((p) => areCoordsEqual(nextPoint, p))) {
       whoseTurn = currentPlayer === PLAYER_ONE ? PLAYER_TWO : PLAYER_ONE
     }
   

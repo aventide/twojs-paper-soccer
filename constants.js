@@ -4,17 +4,30 @@ const NUMBER_COLS = 8;
 const DEFAULT_PADDING_Y = 20;
 const DEFAULT_PADDING_X = 16;
 
-// @todo this is a bit big on desktop
-// const DEFAULT_PITCH_DIMENSIONS = { width: 700, height: 875 };
-const DEFAULT_PITCH_DIMENSIONS = { width: 440, height: 550 };
-
-// this might be useless, if we ALWAYS dynamically calculate this.
-// const DEFAULT_EDGE_LENGTH = DEFAULT_PITCH_DIMENSIONS.width / NUMBER_COLS;
-
-const INITIAL_CENTERPOINT = {
+const CENTERPOINT_X = NUMBER_COLS / 2;
+const CENTERPOINT = {
   x: NUMBER_COLS / 2,
   y: NUMBER_ROWS / 2,
 };
+
+// bouncable points along edge of pitch
+const PITCH_EDGE_POINTS = [];
+// left and right side walls
+for(let y = 1; y <= NUMBER_ROWS - 1; y++){
+  PITCH_EDGE_POINTS.push({x: 0, y})
+  PITCH_EDGE_POINTS.push({x: NUMBER_COLS, y})
+}
+// top and bottom walls excluding goal openings
+for(let x = 0; x <= NUMBER_COLS; x++){
+  if(x <= CENTERPOINT_X - 1 || x >= CENTERPOINT_X + 1 ){
+    PITCH_EDGE_POINTS.push({x, y: 1})
+    PITCH_EDGE_POINTS.push({x, y: NUMBER_ROWS - 1})
+  }
+}
+
+// @todo this is a bit big on desktop
+// const DEFAULT_PITCH_DIMENSIONS = { width: 700, height: 875 };
+const DEFAULT_PITCH_DIMENSIONS = { width: 440, height: 550 };
 
 const INFO_PRIMARY = "info-primary";
 
@@ -31,7 +44,7 @@ const PLAYER_ONE = 1;
 const PLAYER_TWO = 2;
 
 // edgeMap is the list of edges that already exist, and cannot be drawn on.
-const INITIAL_EDGE_MAP = { [`${INITIAL_CENTERPOINT.x}-${INITIAL_CENTERPOINT.y}`]: [] }
+const INITIAL_EDGE_MAP = { [`${CENTERPOINT.x}-${CENTERPOINT.y}`]: [] }
 
 const INITIAL_GAME_MODEL = {
   boxes: {
@@ -47,7 +60,7 @@ const INITIAL_GAME_MODEL = {
     },
   },
   model: {
-    pointList: [INITIAL_CENTERPOINT],
+    pointList: [CENTERPOINT],
     edgeMap: INITIAL_EDGE_MAP,
     winner: null,
     turnFor: PLAYER_ONE,
@@ -62,6 +75,9 @@ const INITIAL_GAME_MODEL = {
 export {
   NUMBER_ROWS,
   NUMBER_COLS,
+  CENTERPOINT,
+  CENTERPOINT_X,
+  PITCH_EDGE_POINTS,
   DEFAULT_PADDING_X,
   DEFAULT_PADDING_Y,
   DEFAULT_PITCH_DIMENSIONS,

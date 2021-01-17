@@ -1,5 +1,4 @@
 import {
-  NUMBER_ROWS,
   NUMBER_COLS,
   DEFAULT_PADDING_X,
   DEFAULT_PADDING_Y,
@@ -11,7 +10,13 @@ import {
 import { loadCore } from './core';
 
 import { getCoordKey } from "./util";
-import { getLegalMoves, getVictoryState, getWhoseTurn} from './rules';
+import { getLegalMoves, getVictoryState, getWhoseTurn } from './rules';
+import {
+  renderGraphPaper,
+  renderPitchBorders,
+  renderStartDot,
+  renderLinePath
+} from './renderers'
 
 // Global window stuff
 window.addEventListener("resize", function () {
@@ -58,7 +63,6 @@ function drawResponsivePitch() {
   };
 
   drawPitch(game.boxes.pitch);
-
   drawActiveTurnPerson();
 }
 
@@ -66,7 +70,7 @@ function drawResponsivePitch() {
 
 // create the game
 const game = loadCore();
-const {two} = game;
+const { two } = game;
 
 // start off with the first render of the pitch
 drawResponsivePitch();
@@ -79,183 +83,13 @@ function drawPitch(pitch) {
   two.clear();
 
   // do we really need both of these args though? They seem really global...refactor this later, you asshole.
-  game.handles.graphPaper = drawGraphPaper(pitch, edgeLength);
-  game.handles.pitchBorders = drawPitchBorders(pitch, edgeLength);
-  game.handles.startPositionDot = drawStartDot(pitch, edgeLength);
+  game.handles.graphPaper = renderGraphPaper(game.two, pitch, edgeLength);
+  game.handles.pitchBorders = renderPitchBorders(game.two, pitch, edgeLength);
+  game.handles.startPositionDot = renderStartDot(game.two, pitch, edgeLength);
   renderPlayerGraphics(edgeLength);
 }
 
-function drawGraphPaper(box, edgeLength) {
-  const lines = [];
 
-  const { anchor, end } = box;
-
-  for (let x = 0; x <= NUMBER_ROWS; x++) {
-    const line = two.makeLine(
-      anchor.x,
-      anchor.y + x * edgeLength,
-      end.x,
-      anchor.y + x * edgeLength
-    );
-    line.stroke = "lightblue";
-    lines.push(lines);
-  }
-  for (let y = 0; y <= NUMBER_COLS; y++) {
-    const line = two.makeLine(
-      anchor.x + y * edgeLength,
-      anchor.y,
-      anchor.x + y * edgeLength,
-      end.y
-    );
-    line.stroke = "lightblue";
-    lines.push(lines);
-  }
-
-  return lines;
-}
-
-function getCenterPoint() {
-  return {
-    x: NUMBER_COLS / 2,
-    y: NUMBER_ROWS / 2,
-  };
-}
-
-function drawPitchBorders(box, edgeLength) {
-  const { anchor, end } = box;
-
-  // get horizontal center
-  const centerpointX = (end.x + anchor.x) / 2;
-
-  // get half-height
-  const heightBound = end.y;
-  // draw goal ends
-  const segments = [
-    // top end
-
-    [
-      centerpointX - edgeLength,
-      anchor.y,
-      centerpointX + edgeLength,
-      anchor.y
-    ],
-    [
-      centerpointX - edgeLength,
-      anchor.y,
-      centerpointX - edgeLength,
-      anchor.y + edgeLength
-    ],
-    [
-      centerpointX + edgeLength,
-      anchor.y,
-      centerpointX + edgeLength,
-      anchor.y + edgeLength
-    ],
-
-    [
-      centerpointX - edgeLength,
-      anchor.y + edgeLength,
-      anchor.x,
-      anchor.y + edgeLength
-    ],
-    [
-      centerpointX + edgeLength,
-      anchor.y + edgeLength,
-      end.x,
-      anchor.y + edgeLength
-    ],
-
-    // bottom end
-
-    [
-      centerpointX - edgeLength,
-      heightBound,
-      centerpointX + edgeLength,
-      heightBound
-    ],
-    [
-      centerpointX - edgeLength,
-      heightBound,
-      centerpointX - edgeLength,
-      heightBound - edgeLength
-    ],
-    [
-      centerpointX + edgeLength,
-      heightBound,
-      centerpointX + edgeLength,
-      heightBound - edgeLength
-    ],
-
-    [
-      centerpointX - edgeLength,
-      heightBound - edgeLength,
-      anchor.x,
-      heightBound - edgeLength
-    ],
-    [
-      centerpointX + edgeLength,
-      heightBound - edgeLength,
-      end.x,
-      heightBound - edgeLength
-    ],
-
-    // sides
-
-    [anchor.x, anchor.y + edgeLength, anchor.x, end.y - edgeLength],
-    [end.x, anchor.y + edgeLength, end.x, end.y - edgeLength]
-  ];
-
-  const handles = segments.map(s => two.makeLine(s[0], s[1], s[2], s[3]))
-  handles.forEach((s) => (s.linewidth = 3));
-  return handles;
-}
-
-function drawStartDot(box, edgeLength) {
-  const point = getCenterPoint(edgeLength);
-  const { anchor } = box;
-
-  const renderablePoint = {
-    x: anchor.x + point.x * edgeLength,
-    y: anchor.y + point.y * edgeLength,
-  };
-
-  const dot = two.makeCircle(renderablePoint.x, renderablePoint.y, 8);
-  dot.fill = "black";
-
-  return dot;
-}
-
-function drawLinePath(points, edgeLength) {
-  if (!points || !points.length) {
-    return;
-  }
-
-  const { anchor } = game.boxes.pitch;
-
-  // scale up distances between points
-  const renderablePoints = points.map((p) => ({
-    x: anchor.x + p.x * edgeLength,
-    y: anchor.y + p.y * edgeLength,
-  }));
-
-  let currentPoint;
-  let nextPoint;
-
-  for (let i in renderablePoints) {
-    currentPoint = renderablePoints[Number(i)];
-    nextPoint = renderablePoints[Number(i) + 1];
-    if (nextPoint) {
-      const segment = two.makeLine(
-        currentPoint.x,
-        currentPoint.y,
-        nextPoint.x,
-        nextPoint.y
-      );
-      segment.stroke = "black";
-      segment.linewidth = 2;
-    }
-  }
-}
 
 function eraseMoveableSpots() {
   two.remove(game.handles.moveableSpots);
@@ -348,8 +182,7 @@ function drawCurrentSpot(currentPoint, edgeLength) {
 
 function renderPlayerGraphics(edgeLength) {
   const currentPoint = game.model.pointList[game.model.pointList.length - 1];
-
-  drawLinePath(game.model.pointList, edgeLength);
+  renderLinePath(game.two, game.boxes.pitch, edgeLength,  game.model.pointList);
   drawCurrentSpot(currentPoint, edgeLength);
 
   if (!!game.model.winner) {

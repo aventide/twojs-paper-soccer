@@ -25,7 +25,6 @@ export function loadCore() {
     // game state: whose turn it is, whether turn is complete (any possible moves left), path in current turn (if enabled), whether game is won and who won
     return {
       ...INITIAL_GAME_MODEL,
-      two
+      two,
     };    
   }
-  

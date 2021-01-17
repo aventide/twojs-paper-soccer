@@ -27,8 +27,8 @@ const INITIAL_HANDLES = {
   pitchBorders: null,
 };
 
-const PLAYER_ONE = 0;
-const PLAYER_TWO = 1;
+const PLAYER_ONE = 1;
+const PLAYER_TWO = 2;
 
 // edgeMap is the list of edges that already exist, and cannot be drawn on.
 const INITIAL_EDGE_MAP = { [`${INITIAL_CENTERPOINT.x}-${INITIAL_CENTERPOINT.y}`]: [] }
@@ -51,6 +51,7 @@ const INITIAL_GAME_MODEL = {
     edgeMap: INITIAL_EDGE_MAP,
     winner: null,
     turnFor: PLAYER_ONE,
+    isBouncing: false,
   },
   handles: { ...INITIAL_HANDLES },
   renderers: {

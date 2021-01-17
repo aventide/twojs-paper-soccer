@@ -1,10 +1,13 @@
 import {
     NUMBER_ROWS,
-    NUMBER_COLS
+    NUMBER_COLS,
+    PLAYER_ONE,
+    PLAYER_TWO,
 } from './constants'
 
 import {
-    getCoordKey
+    getCoordKey,
+    areCoordsEqual
 } from './util'
 
 export function getLegalMoves(currentPoint, edgeMap) {
@@ -58,4 +61,23 @@ export function getLegalMoves(currentPoint, edgeMap) {
     });
   
     return legalMovePoints;
+  }
+
+  export function getVictoryState(point) {
+    if (point.y <= 0) {
+      return PLAYER_ONE;
+    } else if (point.y >= NUMBER_ROWS) {
+      return PLAYER_TWO;
+    } else {
+      return null;
+    }
+  }
+  
+  export function getWhoseTurn(nextPoint, currentPlayer, playedPoints) {
+    let whoseTurn = currentPlayer;
+    if (!playedPoints.some((p) => areCoordsEqual(nextPoint, p))) {
+      whoseTurn = currentPlayer === PLAYER_ONE ? PLAYER_TWO : PLAYER_ONE
+    }
+  
+    return whoseTurn;
   }

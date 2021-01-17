@@ -4,16 +4,14 @@ import {
   DEFAULT_PADDING_X,
   DEFAULT_PADDING_Y,
   DEFAULT_PITCH_DIMENSIONS,
-  PLAYER_ONE,
-  PLAYER_TWO,
   INFO_PRIMARY,
+  PLAYER_ONE,
 } from "./constants";
 
 import { loadCore } from './core';
 
-import { getCoordKey, areCoordsEqual } from "./util";
-import { getLegalMoves } from './rules';
-
+import { getCoordKey } from "./util";
+import { getLegalMoves, getVictoryState, getWhoseTurn} from './rules';
 
 // Global window stuff
 window.addEventListener("resize", function () {
@@ -309,8 +307,9 @@ function drawMoveableSpots(edgeLength) {
         return;
       }
 
-      checkVictoryState(newPoint);
-      checkTurnForState(newPoint);
+      game.model.winner = getVictoryState(newPoint);
+      game.model.turnFor = getWhoseTurn(newPoint, game.model.turnFor, game.model.pointList);
+      drawActiveTurnPerson(game.model.isBouncing);
 
       const lastPointKey = getCoordKey(lastPoint);
       const newPointKey = getCoordKey(newPoint);
@@ -353,40 +352,14 @@ function renderPlayerGraphics(edgeLength) {
   drawLinePath(game.model.pointList, edgeLength);
   drawCurrentSpot(currentPoint, edgeLength);
 
-  if (game.model.winner === PLAYER_ONE || game.model.winner === PLAYER_TWO) {
+  if (!!game.model.winner) {
     eraseMoveableSpots();
-    drawInfo(INFO_PRIMARY, `Player ${game.model.winner + 1} wins the game!`);
+    drawInfo(INFO_PRIMARY, `Player ${game.model.winner} wins the game!`);
     two.update();
   } else {
     drawMoveableSpots(edgeLength);
   }
   two.update();
-}
-
-function checkVictoryState(point) {
-  // make sure this is legal
-
-  // test for player 1 victory
-  if (point.y <= 0) {
-    game.model.winner = PLAYER_ONE;
-    // test for player 2 victory
-  } else if (point.y >= NUMBER_ROWS) {
-    game.model.winner = PLAYER_TWO;
-  }
-}
-
-function checkTurnForState(newPoint) {
-  console.log(game.model.pointList);
-
-  // @todo add edges/vertices for the pitch. Those don't currently bounce.
-
-  // object equality....right...
-  if (!game.model.pointList.some((p) => areCoordsEqual(newPoint, p))) {
-    game.model.turnFor = Number(!Boolean(game.model.turnFor));
-    drawActiveTurnPerson(false);
-  } else {
-    drawActiveTurnPerson(true);
-  }
 }
 
 function drawInfo(element, text) {
@@ -400,7 +373,7 @@ function drawInfo(element, text) {
 
 function drawActiveTurnPerson(isBouncing) {
   const statusText =
-    (game.model.turnFor ? "Player 2" : "Player 1") +
+    (game.model.turnFor === PLAYER_ONE ? "Player 1" : "Player 2") +
     (isBouncing ? ", go again now!" : "");
   drawInfo(INFO_PRIMARY, statusText);
 }

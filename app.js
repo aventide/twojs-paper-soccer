@@ -9,13 +9,11 @@ import {
 
 import { loadCore } from './core';
 
-import { getCoordKey } from "./util";
-import { getLegalMoves, getVictoryState, getWhoseTurn } from './rules';
 import {
   renderGraphPaper,
   renderPitchBorders,
   renderStartDot,
-  renderLinePath
+  renderPlayerGraphics,
 } from './renderers'
 
 // Global window stuff
@@ -86,113 +84,7 @@ function drawPitch(pitch) {
   game.handles.graphPaper = renderGraphPaper(game.two, pitch, edgeLength);
   game.handles.pitchBorders = renderPitchBorders(game.two, pitch, edgeLength);
   game.handles.startPositionDot = renderStartDot(game.two, pitch, edgeLength);
-  renderPlayerGraphics(edgeLength);
-}
-
-
-
-function eraseMoveableSpots() {
-  two.remove(game.handles.moveableSpots);
-}
-
-function drawMoveableSpots(edgeLength) {
-  const radius = edgeLength / 8;
-  const currentPoint = game.model.pointList[game.model.pointList.length - 1];
-  const points = getLegalMoves(currentPoint, game.model.edgeMap);
-
-  const renderedPoints = [];
-  const { anchor } = game.boxes.pitch;
-  points.forEach(point => {
-    renderedPoints.push(two.makeCircle(
-      anchor.x + point.x * edgeLength,
-      anchor.y + point.y * edgeLength,
-      radius
-    ))
-  });
-
-  two.update();
-
-  renderedPoints.forEach((p) => {
-    p._renderer.elem.addEventListener("mouseover", function () {
-      p.fill = "lightblue";
-      p.opacity = 0.6;
-      two.update();
-    });
-    p._renderer.elem.addEventListener("mouseout", function () {
-      p.fill = "white";
-      p.opacity = 1;
-      two.update();
-    });
-
-    // @todo this click leads to a major game state check. Consider making that routine a callback
-    p._renderer.elem.addEventListener("click", function () {
-      const { anchor } = game.boxes.pitch;
-      const lastPoint = game.model.pointList[game.model.pointList.length - 1];
-
-      // @todo ew, we really should use the raw point values, then rendering.
-      const newPoint = {
-        x: (p._translation.x - anchor.x) / edgeLength,
-        y: (p.translation.y - anchor.y) / edgeLength,
-      };
-
-      // @todo is this necessary, really?
-      // really make sure that no one has won yet.
-      if (game.model.winner) {
-        return;
-      }
-
-      game.model.winner = getVictoryState(newPoint);
-      game.model.turnFor = getWhoseTurn(newPoint, game.model.turnFor, game.model.pointList);
-      drawActiveTurnPerson(game.model.isBouncing);
-
-      const lastPointKey = getCoordKey(lastPoint);
-      const newPointKey = getCoordKey(newPoint);
-
-      game.model.pointList.push(newPoint);
-      if (
-        game.model.edgeMap[newPointKey] &&
-        game.model.edgeMap[newPointKey].length
-      ) {
-        game.model.edgeMap[newPointKey].push(lastPointKey);
-        game.model.edgeMap[lastPointKey].push(newPointKey);
-      } else {
-        game.model.edgeMap[newPointKey] = [lastPointKey];
-        game.model.edgeMap[lastPointKey].push(newPointKey);
-      }
-
-      renderPlayerGraphics(edgeLength);
-    });
-  });
-
-  // remove old circles from the pitch
-  eraseMoveableSpots();
-  game.handles.moveableSpots = [...renderedPoints];
-}
-
-function drawCurrentSpot(currentPoint, edgeLength) {
-  const { anchor } = game.boxes.pitch;
-  two.remove(game.handles.currentPositionDot);
-  game.handles.currentPositionDot = two.makeCircle(
-    anchor.x + currentPoint.x * edgeLength,
-    anchor.y + currentPoint.y * edgeLength,
-    edgeLength / 5
-  );
-  game.handles.currentPositionDot.fill = "yellow";
-}
-
-function renderPlayerGraphics(edgeLength) {
-  const currentPoint = game.model.pointList[game.model.pointList.length - 1];
-  renderLinePath(game.two, game.boxes.pitch, edgeLength,  game.model.pointList);
-  drawCurrentSpot(currentPoint, edgeLength);
-
-  if (!!game.model.winner) {
-    eraseMoveableSpots();
-    drawInfo(INFO_PRIMARY, `Player ${game.model.winner} wins the game!`);
-    two.update();
-  } else {
-    drawMoveableSpots(edgeLength);
-  }
-  two.update();
+  renderPlayerGraphics(game, edgeLength);
 }
 
 function drawInfo(element, text) {

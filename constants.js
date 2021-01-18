@@ -67,6 +67,7 @@ const INITIAL_GAME_MODEL = {
     isBouncing: false,
   },
   handles: { ...INITIAL_HANDLES },
+  // if the game was turned into a class, then we could access two, edgeLength, etc, without the extra args
   renderers: {
     init: null
   }

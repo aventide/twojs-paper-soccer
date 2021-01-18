@@ -1,5 +1,4 @@
 import {
-  NUMBER_COLS,
   DEFAULT_PADDING_X,
   DEFAULT_PADDING_Y,
   DEFAULT_PITCH_DIMENSIONS,
@@ -10,10 +9,7 @@ import {
 import { loadCore } from './core';
 
 import {
-  renderGraphPaper,
-  renderPitchBorders,
-  renderStartDot,
-  renderPlayerGraphics,
+  renderPitch
 } from './renderers'
 
 // Global window stuff
@@ -38,13 +34,6 @@ function drawResponsivePitch() {
     two.height = DEFAULT_PITCH_DIMENSIONS.height;
   }
 
-  // make function that defines a box within the canvas
-  // so create the box, assign it to a handle, and then apply drawPitch() and drawGraphPaper() to that box
-
-  // we'll need a translation function to offset stuff that happens in the boxes vs the main canvas
-
-  // at this point, we need to calculate the actual drawable area
-
   const pitchAnchorPoint = {
     x: DEFAULT_PADDING_X,
     y: DEFAULT_PADDING_Y,
@@ -60,7 +49,7 @@ function drawResponsivePitch() {
     end: { ...pitchEndPoint },
   };
 
-  drawPitch(game.boxes.pitch);
+  renderPitch(game);
   drawActiveTurnPerson();
 }
 
@@ -72,20 +61,6 @@ const { two } = game;
 
 // start off with the first render of the pitch
 drawResponsivePitch();
-
-function drawPitch(pitch) {
-  // this might be an ugly float, but seems to be fine for now...
-  const edgeLength = (pitch.end.x - pitch.anchor.x) / NUMBER_COLS;
-
-  // @todo is this necessary?
-  two.clear();
-
-  // do we really need both of these args though? They seem really global...refactor this later, you asshole.
-  game.handles.graphPaper = renderGraphPaper(game.two, pitch, edgeLength);
-  game.handles.pitchBorders = renderPitchBorders(game.two, pitch, edgeLength);
-  game.handles.startPositionDot = renderStartDot(game.two, pitch, edgeLength);
-  renderPlayerGraphics(game, edgeLength);
-}
 
 function drawInfo(element, text) {
   const InfoPanelIdMap = {

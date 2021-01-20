@@ -12,12 +12,7 @@ import {
   renderPitch
 } from './renderers'
 
-// Global window stuff
-window.addEventListener("resize", function () {
-  drawResponsivePitch();
-});
-
-function drawResponsivePitch() {
+function createPitch() {
   const { innerWidth, innerHeight } = window;
 
   // in the future, let's probably just display a "height is too small" message in css
@@ -44,13 +39,10 @@ function drawResponsivePitch() {
     y: two.height - DEFAULT_PADDING_Y,
   };
 
-  game.boxes.pitch = {
+  return {
     anchor: { ...pitchAnchorPoint },
     end: { ...pitchEndPoint },
   };
-
-  renderPitch(game);
-  drawActiveTurnPerson();
 }
 
 // ENTRY POINT
@@ -60,20 +52,11 @@ const game = loadCore();
 const { two } = game;
 
 // start off with the first render of the pitch
-drawResponsivePitch();
+game.boxes.pitch = createPitch();
+renderPitch(game);
 
-function drawInfo(element, text) {
-  const InfoPanelIdMap = {
-    [INFO_PRIMARY]: "turn",
-  };
-
-  const drawElem = document.querySelector(`#${InfoPanelIdMap[element]}`);
-  drawElem.innerText = text;
-}
-
-function drawActiveTurnPerson(isBouncing) {
-  const statusText =
-    (game.model.turnFor === PLAYER_ONE ? "Player 1" : "Player 2") +
-    (isBouncing ? ", go again now!" : "");
-  drawInfo(INFO_PRIMARY, statusText);
-}
+// Global window stuff
+window.addEventListener("resize", function () {
+  game.boxes.pitch = createPitch();
+  renderPitch(game);
+});

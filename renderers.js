@@ -30,10 +30,10 @@ import {
 import { getCoordKey } from "./util";
 import { getLegalMoves, getVictoryState, getWhoseTurn } from './rules';
 
-export function renderGraphPaper(two, box, edgeLength) {
+export function renderGraphPaper(game, edgeLength) {
+  
+  const { two, boxes: {pitch: {anchor, end}}} = game;
   const lines = [];
-
-  const { anchor, end } = box;
 
   for (let x = 0; x <= NUMBER_ROWS; x++) {
     const line = two.makeLine(
@@ -59,8 +59,8 @@ export function renderGraphPaper(two, box, edgeLength) {
   return lines;
 }
 
-export function renderPitchBorders(two, box, edgeLength) {
-  const { anchor, end } = box;
+export function renderPitchBorders(game, edgeLength) {
+  const { two, boxes: {pitch: {anchor, end}}} = game;
 
   // get horizontal center
   const centerpointX = (end.x + anchor.x) / 2;
@@ -148,9 +148,10 @@ export function renderPitchBorders(two, box, edgeLength) {
   return handles;
 }
 
-export function renderStartDot(two, box, edgeLength) {
+export function renderStartDot(game, edgeLength) {
 
-  const { anchor } = box;
+  const { two, boxes: {pitch: {anchor}}} = game;
+
   const renderablePoint = {
     x: anchor.x + CENTERPOINT.x * edgeLength,
     y: anchor.y + CENTERPOINT.y * edgeLength,
@@ -162,12 +163,14 @@ export function renderStartDot(two, box, edgeLength) {
   return dot;
 }
 
-export function renderLinePath(two, box, edgeLength, points) {
+export function renderLinePath(game, edgeLength, points) {
   if (!points || !points.length) {
     return;
   }
 
-  const { anchor } = box;
+  const { two, boxes: {
+    pitch: {anchor}
+  } } = game;
 
   // scale up distances between points
   const renderablePoints = points.map((p) => ({
@@ -195,8 +198,7 @@ export function renderLinePath(two, box, edgeLength, points) {
 }
 
 export function renderCurrentSpot(game, currentPoint, edgeLength) {
-  const { two } = game;
-  const { anchor } = game.boxes.pitch;
+  const { two, boxes: {pitch: {anchor}}} = game;
   two.remove(game.handles.currentPositionDot);
   game.handles.currentPositionDot = two.makeCircle(
     anchor.x + currentPoint.x * edgeLength,
@@ -214,7 +216,7 @@ export function eraseMoveableSpots(game) {
 export function renderPlayerGraphics(game, edgeLength) {
   const { two } = game
   const currentPoint = game.model.pointList[game.model.pointList.length - 1];
-  renderLinePath(game.two, game.boxes.pitch, edgeLength, game.model.pointList);
+  renderLinePath(game, edgeLength, game.model.pointList);
   renderCurrentSpot(game, currentPoint, edgeLength);
 
   if (!!game.model.winner) {
@@ -313,8 +315,8 @@ export function renderPitch(game) {
   two.clear();
 
   // do we really need both of these args though? They seem really global...refactor this later, you asshole.
-  game.handles.graphPaper = renderGraphPaper(game.two, pitch, edgeLength);
-  game.handles.pitchBorders = renderPitchBorders(game.two, pitch, edgeLength);
-  game.handles.startPositionDot = renderStartDot(game.two, pitch, edgeLength);
+  game.handles.graphPaper = renderGraphPaper(game, edgeLength);
+  game.handles.pitchBorders = renderPitchBorders(game, edgeLength);
+  game.handles.startPositionDot = renderStartDot(game, edgeLength);
   renderPlayerGraphics(game, edgeLength);
 }

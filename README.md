@@ -72,6 +72,12 @@ state: {
    - Display victory graphic of some sort.
    - Allow player to start a new game.
 
+
+## Style
+
+Main colors (as the game as two players)
+Deep orange (#EE7600)
+RebeccaPurple (#663399)
 ## Possible Issues on ARM:
 
 // node_modules/puppeteer-core/lib/cjs/puppeteer/node/Launcher.js L:73

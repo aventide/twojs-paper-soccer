@@ -70,7 +70,8 @@ const INITIAL_GAME_MODEL = {
   // if the game was turned into a class, then we could access two, edgeLength, etc, without the extra args
   renderers: {
     init: null
-  }
+  },
+  edgeLength: 0,
 };
 
 export {

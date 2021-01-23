@@ -2,11 +2,10 @@ import {
   DEFAULT_PADDING_X,
   DEFAULT_PADDING_Y,
   DEFAULT_PITCH_DIMENSIONS,
-  INFO_PRIMARY,
-  PLAYER_ONE,
+  NUMBER_COLS,
 } from "./constants";
 
-import { loadCore } from './core';
+import { createGame } from './core';
 
 import {
   renderPitch
@@ -39,24 +38,28 @@ function createPitch() {
     y: two.height - DEFAULT_PADDING_Y,
   };
 
-  return {
+  return [{
     anchor: { ...pitchAnchorPoint },
     end: { ...pitchEndPoint },
-  };
+  }, (pitchEndPoint.x - pitchAnchorPoint.x) / NUMBER_COLS];
 }
 
 // ENTRY POINT
 
 // create the game
-const game = loadCore();
+const game = createGame();
 const { two } = game;
 
 // start off with the first render of the pitch
-game.boxes.pitch = createPitch();
+const [pitch, edgeLength] = createPitch();
+game.boxes.pitch = pitch;
+game.edgeLength = edgeLength;
 renderPitch(game);
 
 // Global window stuff
 window.addEventListener("resize", function () {
-  game.boxes.pitch = createPitch();
+  const [pitch, edgeLength] = createPitch();
+  game.boxes.pitch = pitch;
+  game.edgeLength = edgeLength;
   renderPitch(game);
 });

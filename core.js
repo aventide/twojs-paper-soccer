@@ -11,7 +11,7 @@ function createBox(anchorPoint, endPoint){
     };
 }
 
-export function loadCore() {
+export function createGame() {
     
     // DOM stuff for Two.js
     const appElem = document.getElementById("app");

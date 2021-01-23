@@ -30,9 +30,9 @@ import {
 import { getCoordKey } from "./util";
 import { getLegalMoves, getVictoryState, getWhoseTurn } from './rules';
 
-export function renderGraphPaper(game, edgeLength) {
+export function renderGraphPaper(game) {
   
-  const { two, boxes: {pitch: {anchor, end}}} = game;
+  const { two, edgeLength, boxes: {pitch: {anchor, end}}} = game;
   const lines = [];
 
   for (let x = 0; x <= NUMBER_ROWS; x++) {
@@ -59,8 +59,8 @@ export function renderGraphPaper(game, edgeLength) {
   return lines;
 }
 
-export function renderPitchBorders(game, edgeLength) {
-  const { two, boxes: {pitch: {anchor, end}}} = game;
+export function renderPitchBorders(game) {
+  const { two, edgeLength, boxes: {pitch: {anchor, end}}} = game;
 
   // get horizontal center
   const centerpointX = (end.x + anchor.x) / 2;
@@ -148,9 +148,9 @@ export function renderPitchBorders(game, edgeLength) {
   return handles;
 }
 
-export function renderStartDot(game, edgeLength) {
+export function renderStartDot(game) {
 
-  const { two, boxes: {pitch: {anchor}}} = game;
+  const { two, edgeLength, boxes: {pitch: {anchor}}} = game;
 
   const renderablePoint = {
     x: anchor.x + CENTERPOINT.x * edgeLength,
@@ -163,12 +163,12 @@ export function renderStartDot(game, edgeLength) {
   return dot;
 }
 
-export function renderLinePath(game, edgeLength, points) {
+export function renderLinePath(game, points) {
   if (!points || !points.length) {
     return;
   }
 
-  const { two, boxes: {
+  const { two, edgeLength, boxes: {
     pitch: {anchor}
   } } = game;
 
@@ -197,8 +197,8 @@ export function renderLinePath(game, edgeLength, points) {
   }
 }
 
-export function renderCurrentSpot(game, currentPoint, edgeLength) {
-  const { two, boxes: {pitch: {anchor}}} = game;
+export function renderCurrentSpot(game, currentPoint) {
+  const { two, edgeLength, boxes: {pitch: {anchor}}} = game;
   two.remove(game.handles.currentPositionDot);
   game.handles.currentPositionDot = two.makeCircle(
     anchor.x + currentPoint.x * edgeLength,
@@ -213,24 +213,24 @@ export function eraseMoveableSpots(game) {
   two.remove(game.handles.moveableSpots);
 }
 
-export function renderPlayerGraphics(game, edgeLength) {
+export function renderPlayerGraphics(game) {
   const { two } = game
   const currentPoint = game.model.pointList[game.model.pointList.length - 1];
-  renderLinePath(game, edgeLength, game.model.pointList);
-  renderCurrentSpot(game, currentPoint, edgeLength);
+  renderLinePath(game, game.model.pointList);
+  renderCurrentSpot(game, currentPoint);
 
   if (!!game.model.winner) {
     eraseMoveableSpots(game);
     //   drawInfo(INFO_PRIMARY, `Player ${game.model.winner} wins the game!`);
     two.update();
   } else {
-    renderMoveableSpots(game, edgeLength);
+    renderMoveableSpots(game);
   }
   two.update();
 }
 
-export function renderMoveableSpots(game, edgeLength) {
-  const { two } = game;
+export function renderMoveableSpots(game) {
+  const { two, edgeLength } = game;
   const radius = edgeLength / 8;
   const currentPoint = game.model.pointList[game.model.pointList.length - 1];
   const points = getLegalMoves(currentPoint, game.model.edgeMap);
@@ -295,7 +295,7 @@ export function renderMoveableSpots(game, edgeLength) {
         game.model.edgeMap[lastPointKey].push(newPointKey);
       }
 
-      renderPlayerGraphics(game, edgeLength);
+      renderPlayerGraphics(game);
     });
   });
 
@@ -305,18 +305,12 @@ export function renderMoveableSpots(game, edgeLength) {
 }
 
 export function renderPitch(game) {
-
-  const { two } = game;
-  const { pitch } = game.boxes;
-  // this might be an ugly float, but seems to be fine for now...
-  const edgeLength = (pitch.end.x - pitch.anchor.x) / NUMBER_COLS;
-
   // @todo is this necessary?
-  two.clear();
+  game.two.clear();
 
   // do we really need both of these args though? They seem really global...refactor this later, you asshole.
-  game.handles.graphPaper = renderGraphPaper(game, edgeLength);
-  game.handles.pitchBorders = renderPitchBorders(game, edgeLength);
-  game.handles.startPositionDot = renderStartDot(game, edgeLength);
-  renderPlayerGraphics(game, edgeLength);
+  game.handles.graphPaper = renderGraphPaper(game);
+  game.handles.pitchBorders = renderPitchBorders(game);
+  game.handles.startPositionDot = renderStartDot(game);
+  renderPlayerGraphics(game);
 }

@@ -9,42 +9,6 @@ main {
   height: 100vh;
   display: flex;
   align-items: center;
+  justify-content: center;
   flex-direction: column;
-}
-
-#app {
-  background-color: white;
-}
-
-#info-primary,
-#app,
-#info-secondary {
-  border-left: 3px solid red;
-  border-right: 3px solid red;
-}
-
-#info-primary {
-  height: 50px;
-  width: 100%;
-}
-
-#info-secondary {
-  height: 50px;
-  width: 100%;
-  background-color: red;
-}
-
-@media only screen and (min-width: 440px) {
-  #info-primary {
-    height: 50px;
-    width: 440px;
-
-    background-color: red;
-  }
-
-  #info-secondary {
-    width: 440px;
-    height: 50px;
-    background-color: red;
-  }
 }

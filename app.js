@@ -56,8 +56,35 @@ game.boxes.pitch = pitch;
 game.edgeLength = edgeLength;
 renderPitch(game);
 
+two.bind('update', function(frameCount) {
+
+  let newRingOpacity = game.handles.currentPositionOpacity;
+  let direction = game.handles.direction || 1;
+
+
+  if(direction === 1){
+    if(newRingOpacity < 1){
+      newRingOpacity += 0.01 * direction;
+    } else {
+      direction = -1;
+      newRingOpacity = 0.99
+    }
+  } else {
+    if(newRingOpacity > 0.3){
+      newRingOpacity += 0.01 * direction;
+    } else {
+      direction = 1;
+    }
+  }
+
+  game.handles.currentPositionOpacity = newRingOpacity;
+  game.handles.currentPositionRing.opacity = newRingOpacity;
+  game.handles.direction = direction;
+}).play()
+
 // Global window stuff
 window.addEventListener("resize", function () {
+  two.clear();
   const [pitch, edgeLength] = createPitch();
   game.boxes.pitch = pitch;
   game.edgeLength = edgeLength;

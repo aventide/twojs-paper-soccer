@@ -1,7 +1,8 @@
 import {
   NUMBER_ROWS,
   NUMBER_COLS,
-  CENTERPOINT
+  CENTERPOINT,
+  PLAYER_ONE
 } from "./constants";
 
 import { getCoordKey } from "./util";
@@ -19,7 +20,8 @@ export function renderGraphPaper(game) {
       end.x,
       anchor.y + x * edgeLength
     );
-    line.stroke = "lightblue";
+    line.stroke = "black";
+    line.opacity = 0.5;
     lines.push(lines);
   }
   for (let y = 0; y <= NUMBER_COLS; y++) {
@@ -29,7 +31,8 @@ export function renderGraphPaper(game) {
       anchor.x + y * edgeLength,
       end.y
     );
-    line.stroke = "lightblue";
+    line.stroke = "black";
+    line.opacity = 0.5;
     lines.push(lines);
   }
 
@@ -122,6 +125,7 @@ export function renderPitchBorders(game) {
 
   const handles = segments.map(s => two.makeLine(s[0], s[1], s[2], s[3]))
   handles.forEach((s) => (s.linewidth = 3));
+  handles.forEach((s) => (s.cap = 'square'));
   return handles;
 }
 
@@ -177,12 +181,26 @@ export function renderLinePath(game, points) {
 export function renderCurrentSpot(game, currentPoint) {
   const { two, edgeLength, boxes: {pitch: {anchor}}} = game;
   two.remove(game.handles.currentPositionDot);
-  game.handles.currentPositionDot = two.makeCircle(
+  two.remove(game.handles.currentPositionRing);
+  const centerDot = two.makeCircle(
     anchor.x + currentPoint.x * edgeLength,
     anchor.y + currentPoint.y * edgeLength,
-    edgeLength / 5
+    6
   );
-  game.handles.currentPositionDot.fill = "yellow";
+  centerDot.fill = "black";
+
+  const breathingCircle = two.makeCircle(
+    anchor.x + currentPoint.x * edgeLength,
+    anchor.y + currentPoint.y * edgeLength,
+    edgeLength / 4
+  )
+  
+  breathingCircle.stroke = game.model.turnFor === PLAYER_ONE ? 'rgba(102,51,153,1)' : 'rgba(238,118,0,1)';
+  breathingCircle.linewidth = 5;
+  breathingCircle.noFill();
+
+  game.handles.currentPositionDot = centerDot;
+  game.handles.currentPositionRing = breathingCircle;
 }
 
 export function eraseMoveableSpots(game) {

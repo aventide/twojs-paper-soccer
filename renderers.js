@@ -2,15 +2,15 @@ import {
   NUMBER_ROWS,
   NUMBER_COLS,
   CENTERPOINT,
-  PLAYER_ONE
+  PLAYER_ONE,
 } from "./constants";
 
 import { getCoordKey } from "./util";
 import { getLegalMoves, getVictoryState, getWhoseTurn } from './rules';
 
 export function renderGraphPaper(game) {
-  
-  const { two, edgeLength, boxes: {pitch: {anchor, end}}} = game;
+
+  const { two, edgeLength, boxes: { pitch: { anchor, end } } } = game;
   const lines = [];
 
   for (let x = 0; x <= NUMBER_ROWS; x++) {
@@ -40,7 +40,7 @@ export function renderGraphPaper(game) {
 }
 
 export function renderPitchBorders(game) {
-  const { two, edgeLength, boxes: {pitch: {anchor, end}}} = game;
+  const { two, edgeLength, boxes: { pitch: { anchor, end } } } = game;
 
   // get horizontal center
   const centerpointX = (end.x + anchor.x) / 2;
@@ -131,7 +131,7 @@ export function renderPitchBorders(game) {
 
 export function renderStartDot(game) {
 
-  const { two, edgeLength, boxes: {pitch: {anchor}}} = game;
+  const { two, edgeLength, boxes: { pitch: { anchor } } } = game;
 
   const renderablePoint = {
     x: anchor.x + CENTERPOINT.x * edgeLength,
@@ -150,7 +150,7 @@ export function renderLinePath(game, points) {
   }
 
   const { two, edgeLength, boxes: {
-    pitch: {anchor}
+    pitch: { anchor }
   } } = game;
 
   // scale up distances between points
@@ -179,7 +179,7 @@ export function renderLinePath(game, points) {
 }
 
 export function renderCurrentSpot(game, currentPoint) {
-  const { two, edgeLength, boxes: {pitch: {anchor}}} = game;
+  const { two, edgeLength, boxes: { pitch: { anchor } } } = game;
   two.remove(game.handles.currentPositionDot);
   two.remove(game.handles.currentPositionRing);
   const centerDot = two.makeCircle(
@@ -187,15 +187,18 @@ export function renderCurrentSpot(game, currentPoint) {
     anchor.y + currentPoint.y * edgeLength,
     6
   );
-  centerDot.fill = "black";
+
+  const turnForColor = game.model.turnFor === PLAYER_ONE ? 'rgba(102,51,153,1)' : 'rgba(238,118,0,1)';
+  centerDot.fill = turnForColor;
+  centerDot.stroke = turnForColor;
 
   const breathingCircle = two.makeCircle(
     anchor.x + currentPoint.x * edgeLength,
     anchor.y + currentPoint.y * edgeLength,
     edgeLength / 4
   )
-  
-  breathingCircle.stroke = game.model.turnFor === PLAYER_ONE ? 'rgba(102,51,153,1)' : 'rgba(238,118,0,1)';
+
+  breathingCircle.stroke = turnForColor;
   breathingCircle.linewidth = 5;
   breathingCircle.noFill();
 
@@ -273,7 +276,6 @@ export function renderMoveableSpots(game) {
 
       game.model.winner = getVictoryState(newPoint);
       game.model.turnFor = getWhoseTurn(newPoint, game.model.turnFor, game.model.pointList);
-      // drawActiveTurnPerson(game.model.isBouncing);
 
       const lastPointKey = getCoordKey(lastPoint);
       const newPointKey = getCoordKey(newPoint);
@@ -298,6 +300,9 @@ export function renderMoveableSpots(game) {
   eraseMoveableSpots(game);
   game.handles.moveableSpots = [...renderedPoints];
 }
+
+// these renderers could be moved to specific folders.
+// like, renderers/pitch
 
 export function renderPitch(game) {
   game.handles.graphPaper = renderGraphPaper(game);

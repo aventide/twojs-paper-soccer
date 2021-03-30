@@ -54,13 +54,13 @@ const { two } = game;
 const [pitch, edgeLength] = createPitch();
 game.boxes.pitch = pitch;
 game.edgeLength = edgeLength;
+
 renderPitch(game);
 
 two.bind('update', function(frameCount) {
 
   let newRingOpacity = game.handles.currentPositionOpacity;
   let direction = game.handles.direction || 1;
-
 
   if(direction === 1){
     if(newRingOpacity < 1){
@@ -78,7 +78,9 @@ two.bind('update', function(frameCount) {
   }
 
   game.handles.currentPositionOpacity = newRingOpacity;
-  game.handles.currentPositionRing.opacity = newRingOpacity;
+  if(game.handles.currentPositionRing){
+    game.handles.currentPositionRing.opacity = newRingOpacity;
+  }
   game.handles.direction = direction;
 }).play()
 

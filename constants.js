@@ -72,7 +72,9 @@ const INITIAL_GAME_MODEL = {
   renderers: {
     init: null
   },
+  selectedLayer: 'game',
   edgeLength: 0,
+
 };
 
 export {

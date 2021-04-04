@@ -1,16 +1,25 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width" />
-    <title>Paper Soccer in TwoJS</title>
-    <link rel="stylesheet" href="index.css" />
-  </head>
-  <body>
-    <main>
-      <div id="overlay"></div>
-      <div id="app"></div>
-    </main>
-    <script type="module" src="/index.js"></script>
-  </body>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width" />
+  <title>Paper Soccer in TwoJS</title>
+  <link rel="stylesheet" href="index.css" />
+  <script src="assets/svg-inject.min.js"></script> 
+</head>
+<body>
+  <div id="assets">
+    <img src="assets/linebound.svg" onload="SVGInject(this)" id="linebound">
+    <img src="assets/start.svg" onload="SVGInject(this)" id="start">
+    <img src="assets/rules.svg" onload="SVGInject(this)" id="rules">
+    <!--something is wrong with the one below-->
+    <img src="assets/byalexstaples.svg" onload="SVGInject(this)" id="byalexstaples">
+  </div>
+  <main>
+    <div id="overlay"></div>
+    <div id="app"></div>
+  </main>
+  <script type="module" src="/index.js"></script>
+</body>
+
 </html>

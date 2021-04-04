@@ -8,6 +8,19 @@ import {
 import { getCoordKey } from "./util";
 import { getLegalMoves, getVictoryState, getWhoseTurn } from './rules';
 
+export function renderGame(game) {
+  const {selectedLayer} = game;
+  if(selectedLayer === 'start') {
+    renderStartMenu(game);
+  } else {
+    renderPitch(game);
+  }
+}
+
+export function renderStartMenu(game) {
+
+}
+
 export function renderGraphPaper(game) {
 
   const { two, edgeLength, boxes: { pitch: { anchor, end } } } = game;
@@ -20,7 +33,7 @@ export function renderGraphPaper(game) {
       end.x,
       anchor.y + x * edgeLength
     );
-    line.stroke = "black";
+    line.stroke = "#07bde5";
     line.opacity = 0.5;
     lines.push(lines);
   }
@@ -31,7 +44,7 @@ export function renderGraphPaper(game) {
       anchor.x + y * edgeLength,
       end.y
     );
-    line.stroke = "black";
+    line.stroke = "#07bde5";
     line.opacity = 0.5;
     lines.push(lines);
   }

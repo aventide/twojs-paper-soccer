@@ -8,7 +8,7 @@ import {
 import { createGame } from './core';
 
 import {
-  renderPitch
+  renderGame
 } from './renderers'
 
 function createPitch() {
@@ -55,7 +55,7 @@ const [pitch, edgeLength] = createPitch();
 game.boxes.pitch = pitch;
 game.edgeLength = edgeLength;
 
-renderPitch(game);
+renderGame(game);
 
 two.bind('update', function(frameCount) {
 
@@ -90,5 +90,5 @@ window.addEventListener("resize", function () {
   const [pitch, edgeLength] = createPitch();
   game.boxes.pitch = pitch;
   game.edgeLength = edgeLength;
-  renderPitch(game);
+  renderGame(game);
 });

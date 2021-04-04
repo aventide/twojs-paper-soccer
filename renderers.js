@@ -18,7 +18,12 @@ export function renderGame(game) {
 }
 
 export function renderStartMenu(game) {
-
+  game.handles.buttons.start.visible = true;
+  game.handles.buttons.start._renderer.elem.addEventListener('click', () => {
+    game.handles.buttons.start.visible = false
+    game.selectedLayer = "game"
+    renderGame(game)
+  })
 }
 
 export function renderGraphPaper(game) {
@@ -256,6 +261,7 @@ export function renderMoveableSpots(game) {
     ))
   });
 
+  // need to update before assigning click handlers!
   two.update();
 
   renderedPoints.forEach((p) => {

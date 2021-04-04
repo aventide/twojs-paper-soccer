@@ -17,13 +17,17 @@ export function createGame() {
     const two = new Two(DEFAULT_PITCH_DIMENSIONS);
     two.appendTo(appElem);
 
-    const buttons = []
+    const buttons = {}
     const svgs = document.querySelectorAll('#assets svg');
     svgs.forEach(svg => {        
         const shape = two.interpret(svg).center();
+        shape.visible = false
         shape.translation.set(two.width / 2, two.height / 2);
-        buttons.push(shape)
+        buttons[shape.id] = shape;
     })
+
+    // this must be done before any event listeners are defined.
+    two.update();
     
     // boxes: subdvisions of the main canvas specific for this game. Used for placement of main elements
     // model: effective state to base rendering from

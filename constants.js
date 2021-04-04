@@ -72,7 +72,7 @@ const INITIAL_GAME_MODEL = {
   renderers: {
     init: null
   },
-  selectedLayer: 'game',
+  selectedLayer: 'start',
   edgeLength: 0,
 
 };

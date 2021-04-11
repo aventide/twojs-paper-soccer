@@ -86,9 +86,9 @@ two.bind('update', function(frameCount) {
 
 // Global window stuff
 window.addEventListener("resize", function () {
-  two.clear();
-  const [pitch, edgeLength] = createPitch();
-  game.boxes.pitch = pitch;
-  game.edgeLength = edgeLength;
+  // two.clear();
+  // const [pitch, edgeLength] = createPitch();
+  // game.boxes.pitch = pitch;
+  // game.edgeLength = edgeLength;
   renderGame(game);
 });

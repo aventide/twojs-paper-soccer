@@ -2,6 +2,7 @@ import {
   NUMBER_ROWS,
   NUMBER_COLS,
   CENTERPOINT,
+  DEFAULT_PADDING_Y,
   PLAYER_ONE,
 } from "./constants";
 
@@ -9,8 +10,9 @@ import { getCoordKey } from "./util";
 import { getLegalMoves, getVictoryState, getWhoseTurn } from './rules';
 
 export function renderGame(game) {
-  const {selectedLayer} = game;
-  if(selectedLayer === 'start') {
+  const { selectedLayer } = game;
+
+  if (selectedLayer === 'start') {
     renderStartMenu(game);
   } else {
     renderPitch(game);
@@ -18,12 +20,33 @@ export function renderGame(game) {
 }
 
 export function renderStartMenu(game) {
+
+  const { two, edgeLength, boxes: { pitch: { anchor, end } } } = game;
+
+  // get horizontal center
+  const centerpointX = (end.x + anchor.x) / 2;
+
+  // get vertical centerpoint
+  const heightBound = (end.y + anchor.y) / 2;
+
+
+  // 200 is the known height. We want to get to the proper scale value.
+  // ScaleValue = edgeLength / known value
+  game.handles.buttons.start.scale = edgeLength / 200;
+
+
+  game.handles.buttons.start.translation.set(centerpointX, heightBound - (edgeLength * 0.5));
   game.handles.buttons.start.visible = true;
   game.handles.buttons.start._renderer.elem.addEventListener('click', () => {
     game.handles.buttons.start.visible = false
+    game.handles.buttons.rules.visible = false
     game.selectedLayer = "game"
     renderGame(game)
   })
+
+  game.handles.buttons.rules.scale = edgeLength / 200;
+  game.handles.buttons.rules.translation.set(centerpointX, heightBound + edgeLength * 1.5);
+  game.handles.buttons.rules.visible = true;
 }
 
 export function renderGraphPaper(game) {

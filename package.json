@@ -23,7 +23,8 @@
     "@web/test-runner": "^0.12.2",
     "snowpack": "^3.0.7"
   },
-"dependencies": {
+  "dependencies": {
+    "@iconfu/svg-inject": "^1.2.3",
     "two.js": "^0.7.0-stable.1"
   }
 }

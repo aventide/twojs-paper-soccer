@@ -52,7 +52,7 @@ const { two } = game;
 
 // start off with the first render of the pitch
 const [pitch, edgeLength] = createPitch();
-game.boxes.pitch = pitch;
+game.views.pitch = pitch;
 game.edgeLength = edgeLength;
 
 renderGame(game);
@@ -88,7 +88,7 @@ two.bind('update', function(frameCount) {
 window.addEventListener("resize", function () {
   // two.clear();
   // const [pitch, edgeLength] = createPitch();
-  // game.boxes.pitch = pitch;
+  // game.views.pitch = pitch;
   // game.edgeLength = edgeLength;
   renderGame(game);
 });

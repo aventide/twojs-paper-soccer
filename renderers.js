@@ -21,7 +21,7 @@ export function renderGame(game) {
 
 export function renderStartMenu(game) {
 
-  const { two, edgeLength, boxes: { pitch: { anchor, end } } } = game;
+  const { two, edgeLength, views: { pitch: { anchor, end } } } = game;
 
   // get horizontal center
   const centerpointX = (end.x + anchor.x) / 2;
@@ -51,7 +51,7 @@ export function renderStartMenu(game) {
 
 export function renderGraphPaper(game) {
 
-  const { two, edgeLength, boxes: { pitch: { anchor, end } } } = game;
+  const { two, edgeLength, views: { pitch: { anchor, end } } } = game;
   const lines = [];
 
   for (let x = 0; x <= NUMBER_ROWS; x++) {
@@ -81,7 +81,7 @@ export function renderGraphPaper(game) {
 }
 
 export function renderPitchBorders(game) {
-  const { two, edgeLength, boxes: { pitch: { anchor, end } } } = game;
+  const { two, edgeLength, views: { pitch: { anchor, end } } } = game;
 
   // get horizontal center
   const centerpointX = (end.x + anchor.x) / 2;
@@ -172,7 +172,7 @@ export function renderPitchBorders(game) {
 
 export function renderStartDot(game) {
 
-  const { two, edgeLength, boxes: { pitch: { anchor } } } = game;
+  const { two, edgeLength, views: { pitch: { anchor } } } = game;
 
   const renderablePoint = {
     x: anchor.x + CENTERPOINT.x * edgeLength,
@@ -190,7 +190,7 @@ export function renderLinePath(game, points) {
     return;
   }
 
-  const { two, edgeLength, boxes: {
+  const { two, edgeLength, views: {
     pitch: { anchor }
   } } = game;
 
@@ -220,7 +220,7 @@ export function renderLinePath(game, points) {
 }
 
 export function renderCurrentSpot(game, currentPoint) {
-  const { two, edgeLength, boxes: { pitch: { anchor } } } = game;
+  const { two, edgeLength, views: { pitch: { anchor } } } = game;
   two.remove(game.handles.currentPositionDot);
   two.remove(game.handles.currentPositionRing);
   const centerDot = two.makeCircle(
@@ -275,7 +275,7 @@ export function renderMoveableSpots(game) {
   const points = getLegalMoves(currentPoint, game.model.edgeMap);
 
   const renderedPoints = [];
-  const { anchor } = game.boxes.pitch;
+  const { anchor } = game.views.pitch;
   points.forEach(point => {
     renderedPoints.push(two.makeCircle(
       anchor.x + point.x * edgeLength,
@@ -301,7 +301,7 @@ export function renderMoveableSpots(game) {
 
     // @todo this click leads to a major game state check. Consider making that routine a callback
     p._renderer.elem.addEventListener("click", function () {
-      const { anchor } = game.boxes.pitch;
+      const { anchor } = game.views.pitch;
       const lastPoint = game.model.pointList[game.model.pointList.length - 1];
 
       // @todo ew, we really should use the raw point values, then rendering.

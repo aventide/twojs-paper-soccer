@@ -48,7 +48,7 @@ const PLAYER_TWO = 2;
 const INITIAL_EDGE_MAP = { [`${CENTERPOINT.x}-${CENTERPOINT.y}`]: [] }
 
 const INITIAL_GAME_MODEL = {
-  boxes: {
+  views: {
     pitch: {
       anchor: {
         x: 0,

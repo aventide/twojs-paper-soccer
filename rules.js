@@ -33,9 +33,9 @@ export function getLegalMoves(currentPoint, edgeMap) {
       const key = getCoordKey({ x: point.x, y: point.y });
       const compare = edgeMap[key];
   
-      const isPointBouncingOffSideWalls = (currentPoint.x > 0 || point.x > 0) && (currentPoint.x < widthBound || point.x < widthBound)
+      const isPointLegallyBouncingOffSideWalls = (currentPoint.x > 0 || point.x > 0) && (currentPoint.x < widthBound || point.x < widthBound)
   
-      const isPointBouncingOffTopWall = currentPoint.y > 1 || (point.y === 0 ? (
+      const isPointLegallyBouncingOffTopWall = currentPoint.y > 1 || (point.y === 0 ? (
         (currentPoint.x === centerpointX) ||
         (currentPoint.x === centerpointX - 1 || currentPoint.x === centerpointX + 1) && point.x === centerpointX
       ) : (
@@ -44,7 +44,7 @@ export function getLegalMoves(currentPoint, edgeMap) {
           currentPoint.x === centerpointX
         ))
   
-      const isPointBouncingOffBottomWall = currentPoint.y < heightBound - 1 || (point.y === heightBound ? (
+      const isPointLegallyBouncingOffBottomWall = currentPoint.y < heightBound - 1 || (point.y === heightBound ? (
         (currentPoint.x === centerpointX) ||
         (currentPoint.x === centerpointX - 1 || currentPoint.x === centerpointX + 1) && point.x === centerpointX
       ) : (
@@ -55,10 +55,11 @@ export function getLegalMoves(currentPoint, edgeMap) {
   
       const isPointNotOnExistingEdge = ((!compare || !compare.includes(getCoordKey(currentPoint))));
   
-      return isPointBouncingOffSideWalls &&
+      // @todo some of these rules are badly named or at least looooong. 
+      return isPointLegallyBouncingOffSideWalls &&
         isPointNotOnExistingEdge &&
-        isPointBouncingOffTopWall &&
-        isPointBouncingOffBottomWall;
+        isPointLegallyBouncingOffTopWall &&
+        isPointLegallyBouncingOffBottomWall;
     });
   
     return legalMovePoints;

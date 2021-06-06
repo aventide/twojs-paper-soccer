@@ -19,10 +19,9 @@ export function createGame() {
 
     const buttons = {}
     const svgs = document.querySelectorAll('#assets svg');
-    svgs.forEach(svg => {        
+    svgs.forEach(svg => {
         const shape = two.interpret(svg).center();
         shape.visible = false
-        shape.translation.set(two.width / 2, two.height / 2);
         buttons[shape.id] = shape;
     })
 

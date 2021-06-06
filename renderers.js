@@ -1,8 +1,7 @@
 import {
-  NUMBER_ROWS,
-  NUMBER_COLS,
+  NUMBER_PITCH_ROWS,
+  NUMBER_PITCH_COLS,
   CENTERPOINT,
-  DEFAULT_PADDING_Y,
   PLAYER_ONE,
 } from "./constants";
 
@@ -15,6 +14,7 @@ export function renderGame(game) {
   if (selectedLayer === 'start') {
     renderStartMenu(game);
   } else {
+    renderHeader(game);
     renderPitch(game);
   }
 }
@@ -29,19 +29,16 @@ export function renderStartMenu(game) {
   // get vertical centerpoint
   const heightBound = (end.y + anchor.y) / 2;
 
-
   // 200 is the known height. We want to get to the proper scale value.
   // ScaleValue = edgeLength / known value
   game.handles.buttons.start.scale = edgeLength / 200;
-
-
   game.handles.buttons.start.translation.set(centerpointX, heightBound - (edgeLength * 0.5));
   game.handles.buttons.start.visible = true;
   game.handles.buttons.start._renderer.elem.addEventListener('click', () => {
-    game.handles.buttons.start.visible = false
-    game.handles.buttons.rules.visible = false
-    game.selectedLayer = "game"
-    renderGame(game)
+    game.handles.buttons.start.visible = false;
+    game.handles.buttons.rules.visible = false;
+    game.selectedLayer = "game";
+    renderGame(game);
   })
 
   game.handles.buttons.rules.scale = edgeLength / 200;
@@ -54,7 +51,7 @@ export function renderGraphPaper(game) {
   const { two, edgeLength, views: { pitch: { anchor, end } } } = game;
   const lines = [];
 
-  for (let x = 0; x <= NUMBER_ROWS; x++) {
+  for (let x = 0; x <= NUMBER_PITCH_ROWS; x++) {
     const line = two.makeLine(
       anchor.x,
       anchor.y + x * edgeLength,
@@ -65,7 +62,7 @@ export function renderGraphPaper(game) {
     line.opacity = 0.5;
     lines.push(lines);
   }
-  for (let y = 0; y <= NUMBER_COLS; y++) {
+  for (let y = 0; y <= NUMBER_PITCH_COLS; y++) {
     const line = two.makeLine(
       anchor.x + y * edgeLength,
       anchor.y,
@@ -168,6 +165,21 @@ export function renderPitchBorders(game) {
   handles.forEach((s) => (s.linewidth = 3));
   handles.forEach((s) => (s.cap = 'square'));
   return handles;
+}
+
+export function renderPitchGoals(game) {
+
+  const { two, edgeLength, views: { pitch: { anchor, end } } } = game
+
+  // get horizontal center
+  const centerpointX = (end.x + anchor.x) / 2;
+
+  // 200 is the known height. We want to get to the proper scale value.
+  // ScaleValue = edgeLength / known value
+
+  game.handles.buttons.goalshade.scale = edgeLength / 200;
+  game.handles.buttons.goalshade.translation.set(centerpointX, anchor.y + (edgeLength * 0.5));
+  game.handles.buttons.goalshade.visible = true;
 }
 
 export function renderStartDot(game) {
@@ -350,5 +362,25 @@ export function renderPitch(game) {
   game.handles.graphPaper = renderGraphPaper(game);
   game.handles.pitchBorders = renderPitchBorders(game);
   game.handles.startPositionDot = renderStartDot(game);
+  renderPitchGoals(game)
   renderPlayerGraphics(game);
+}
+
+export function renderHeader(game) {
+
+  const {two} = game
+
+  const styles = {
+    family: 'roboto mono, sans-serif',
+    size: 32,
+    leading: 50,
+    weight: 900,
+  };
+
+  const message = two.makeText("message", 0,0, styles);
+  message.anchor = "start";
+  game.handles.text.message = two.makeGroup(message)
+  game.handles.text.message.translation.set(150, 50)
+
+  game.two.update()
 }

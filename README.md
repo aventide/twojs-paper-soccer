@@ -65,7 +65,7 @@ state: {
      - Includes drawing all the edges as well as redrawing movement dots
    - Determine whether a victory is reached.
      - If so, remove movement dots and then see (4) below
-   - Determine if the player's turn has ended.
+   - Determine if the player's turn has ended.x
 
 4. Victory has been reached
    - Record the victory (TBD - stub this for now)

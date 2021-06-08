@@ -16,6 +16,7 @@ export function renderGame(game) {
   } else {
     renderHeader(game);
     renderPitch(game);
+    renderFooter(game)
   }
 }
 
@@ -367,20 +368,55 @@ export function renderPitch(game) {
 }
 
 export function renderHeader(game) {
+  const {two, edgeLength, appWidth, views} = game
+  const { header } = views;
+  const { anchor, end } = header;
 
-  const {two} = game
-
-  const styles = {
+  const playerNameStyles = {
     family: 'roboto mono, sans-serif',
     size: 32,
     leading: 50,
     weight: 900,
   };
 
-  const message = two.makeText("message", 0,0, styles);
-  message.anchor = "start";
-  game.handles.text.message = two.makeGroup(message)
-  game.handles.text.message.translation.set(150, 50)
+  const turnStyles = {
+    family: 'roboto mono, sans-serif',
+    size: 16,
+    leading: 50,
+    weight: 900,
+  };
+
+  const turnText = two.makeText("Turn:", anchor.x, 15, turnStyles);
+  const movesText = two.makeText("Moves:", end.x - edgeLength, 15, turnStyles);
+ 
+  const playerNameText = two.makeText("Andi", anchor.x, anchor.y + edgeLength, playerNameStyles);
+  const numberOfMovesText = two.makeText("50", end.x - edgeLength , end.y - edgeLength, playerNameStyles);
 
   game.two.update()
+  turnText._renderer.elem.setAttribute('text-anchor', 'start');
+  playerNameText._renderer.elem.setAttribute('text-anchor', 'start');
+  movesText._renderer.elem.setAttribute('text-anchor', 'start');
+  numberOfMovesText._renderer.elem.setAttribute('text-anchor', 'start');
+}
+
+export function renderFooter(game) {
+  const {two, views, edgeLength, appWidth, appHeight} = game;
+  const { footer } = views;
+  const { anchor, end } = footer;
+
+  const menuButtonStyles = {
+    family: 'roboto mono, sans-serif',
+    size: 16,
+    leading: 50,
+    weight: 900,
+    fill: "#FFFFFF"
+  }
+  
+  const xMidpoint = appWidth / 2;
+
+  const button = two.makeRectangle(xMidpoint, end.y - 0.5 * edgeLength, edgeLength * 6, edgeLength)
+  button.fill = "#000000";
+  
+  const buttonText = two.makeText("MENU", xMidpoint, end.y - 0.5 * edgeLength, menuButtonStyles)
+  two.update()
 }

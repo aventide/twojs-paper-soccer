@@ -62,6 +62,27 @@ function createPitch() {
   };
 }
 
+function createFooter() {
+
+  const {appWidth, appHeight, edgeLength} = game;
+  const PADDING = edgeLength;
+
+  const footerAnchorPoint = {
+    x: PADDING ,
+    y: appHeight - (3 * edgeLength),
+  };
+
+  const footerEndPoint = {
+    x: appWidth - PADDING,
+    y: appHeight
+  };
+
+  return {
+    anchor: { ...footerAnchorPoint },
+    end: { ...footerEndPoint },
+  };
+}
+
 // ENTRY POINT
 
 // create the game
@@ -84,8 +105,9 @@ game.appHeight = appRows * game.edgeLength;
 two.width = game.appWidth;
 two.height = game.appHeight;
 
-game.views.pitch = createPitch()
 game.views.header = createHeader();
+game.views.pitch = createPitch()
+game.views.footer = createFooter();
 
 // start off with the first render of the pitch
 renderGame(game);

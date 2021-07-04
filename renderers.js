@@ -6,7 +6,7 @@ import {
 } from "./constants";
 
 import { getCoordKey } from "./util";
-import { getLegalMoves, getVictoryState, getWhoseTurn } from './rules';
+import { getLegalMoves, getVictoryState, getWhoseTurn, getShouldSwitchTurns } from './rules';
 
 export function renderGame(game) {
   const { selectedLayer } = game;
@@ -178,9 +178,15 @@ export function renderPitchGoals(game) {
   // 200 is the known height. We want to get to the proper scale value.
   // ScaleValue = edgeLength / known value
 
-  game.handles.buttons.goalshade.scale = edgeLength / 200;
-  game.handles.buttons.goalshade.translation.set(centerpointX, anchor.y + (edgeLength * 0.5));
-  game.handles.buttons.goalshade.visible = true;
+  // goalshade purple
+  game.handles.buttons.goalshade_purple.scale = edgeLength / 200;
+  game.handles.buttons.goalshade_purple.translation.set(centerpointX, anchor.y + (edgeLength * 0.25));
+  game.handles.buttons.goalshade_purple.visible = true;
+
+  // goalshade orange
+  game.handles.buttons.goalshade_orange.scale = edgeLength / 200;
+  game.handles.buttons.goalshade_orange.translation.set(centerpointX, end.y - (edgeLength * 0.25));
+  game.handles.buttons.goalshade_orange.visible = true;
 }
 
 export function renderStartDot(game) {
@@ -331,6 +337,9 @@ export function renderMoveableSpots(game) {
 
       game.model.winner = getVictoryState(newPoint);
       game.model.turnFor = getWhoseTurn(newPoint, game.model.turnFor, game.model.pointList);
+      if(getShouldSwitchTurns(newPoint, game.model.pointList)){
+        game.model.turnNumber += 1;
+      }
 
       const lastPointKey = getCoordKey(lastPoint);
       const newPointKey = getCoordKey(newPoint);
@@ -348,6 +357,7 @@ export function renderMoveableSpots(game) {
       }
 
       renderPlayerGraphics(game);
+      renderHeader(game);
     });
   });
 
@@ -386,11 +396,17 @@ export function renderHeader(game) {
     weight: 900,
   };
 
+  // clean up old text
+  if(game.handles.turnNumber){
+    two.remove(game.handles.turnNumber);
+  }
+
   const turnText = two.makeText("Turn:", anchor.x, 15, turnStyles);
   const movesText = two.makeText("Moves:", end.x - edgeLength, 15, turnStyles);
  
-  const playerNameText = two.makeText("Andi", anchor.x, anchor.y + edgeLength, playerNameStyles);
-  const numberOfMovesText = two.makeText("50", end.x - edgeLength , end.y - edgeLength, playerNameStyles);
+  const playerNameText = two.makeText("Alex", anchor.x, anchor.y + edgeLength, playerNameStyles);
+  const numberOfMovesText = two.makeText(game.model.turnNumber, end.x - edgeLength , end.y - edgeLength, playerNameStyles);
+  game.handles.turnNumber = numberOfMovesText;
 
   game.two.update()
   turnText._renderer.elem.setAttribute('text-anchor', 'start');
@@ -412,11 +428,11 @@ export function renderFooter(game) {
     fill: "#FFFFFF"
   }
   
-  const xMidpoint = appWidth / 2;
+  const centerpointX = (end.x + anchor.x) / 2;
 
-  const button = two.makeRectangle(xMidpoint, end.y - 0.5 * edgeLength, edgeLength * 6, edgeLength)
+  const button = two.makeRectangle(centerpointX, end.y - 0.5 * edgeLength, edgeLength * 6, edgeLength)
   button.fill = "#000000";
   
-  const buttonText = two.makeText("MENU", xMidpoint, end.y - 0.5 * edgeLength, menuButtonStyles)
+  const buttonText = two.makeText("MENU", centerpointX, end.y - 0.5 * edgeLength, menuButtonStyles)
   two.update()
 }

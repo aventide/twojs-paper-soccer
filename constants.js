@@ -55,6 +55,7 @@ const INITIAL_GAME_MODEL = {
     edgeMap: INITIAL_EDGE_MAP,
     winner: null,
     turnFor: PLAYER_ONE,
+    turnNumber: 1,
     isBouncing: false,
   },
   handles: { ...INITIAL_HANDLES },
@@ -64,7 +65,6 @@ const INITIAL_GAME_MODEL = {
   },
   selectedLayer: 'start',
   edgeLength: 0,
-
 };
 
 export {

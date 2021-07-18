@@ -139,11 +139,17 @@ two.bind('update', function (frameCount) {
   game.handles.direction = direction;
 }).play()
 
+const debouncedRenderGame = debounce(() => renderGame(game))
+
 // Global window stuff
 window.addEventListener("resize", function () {
-  // two.clear();
-  // const [pitch, edgeLength] = createPitch();
-  // game.views.pitch = pitch;
-  // game.edgeLength = edgeLength;
-  renderGame(game);
+  debouncedRenderGame()
 });
+
+function debounce(func, timeout = 1000){
+  let timer;
+  return (...args) => {
+    clearTimeout(timer);
+    timer = setTimeout(() => { func.apply(this, args); }, timeout);
+  };
+}

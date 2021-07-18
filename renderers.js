@@ -14,13 +14,14 @@ export function renderGame(game) {
   if (selectedLayer === 'start') {
     renderStartMenu(game);
   } else {
+    game.two.clear();
     renderHeader(game);
     renderPitch(game);
     renderFooter(game)
   }
 }
 
-export function renderStartMenu(game) {
+ function renderStartMenu(game) {
 
   const { two, edgeLength, views: { pitch: { anchor, end } } } = game;
 
@@ -47,7 +48,7 @@ export function renderStartMenu(game) {
   game.handles.buttons.rules.visible = true;
 }
 
-export function renderGraphPaper(game) {
+ function renderGraphPaper(game) {
 
   const { two, edgeLength, views: { pitch: { anchor, end } } } = game;
   const lines = [];
@@ -75,10 +76,11 @@ export function renderGraphPaper(game) {
     lines.push(lines);
   }
 
-  return lines;
+  game.handles.graphPaper = two.makeGroup(lines);
+
 }
 
-export function renderPitchBorders(game) {
+ function renderPitchBorders(game) {
   const { two, edgeLength, views: { pitch: { anchor, end } } } = game;
 
   // get horizontal center
@@ -165,10 +167,12 @@ export function renderPitchBorders(game) {
   const handles = segments.map(s => two.makeLine(s[0], s[1], s[2], s[3]))
   handles.forEach((s) => (s.linewidth = 3));
   handles.forEach((s) => (s.cap = 'square'));
-  return handles;
+
+  game.handles.pitchBorders =  two.makeGroup(handles);
+
 }
 
-export function renderPitchGoals(game) {
+ function renderPitchGoals(game) {
 
   const { two, edgeLength, views: { pitch: { anchor, end } } } = game
 
@@ -189,7 +193,7 @@ export function renderPitchGoals(game) {
   game.handles.buttons.goalshade_orange.visible = true;
 }
 
-export function renderStartDot(game) {
+ function renderStartDot(game) {
 
   const { two, edgeLength, views: { pitch: { anchor } } } = game;
 
@@ -201,10 +205,10 @@ export function renderStartDot(game) {
   const dot = two.makeCircle(renderablePoint.x, renderablePoint.y, 8);
   dot.fill = "black";
 
-  return dot;
+  game.handles.startPositionDot = dot;
 }
 
-export function renderLinePath(game, points) {
+ function renderLinePath(game, points) {
   if (!points || !points.length) {
     return;
   }
@@ -238,7 +242,7 @@ export function renderLinePath(game, points) {
   }
 }
 
-export function renderCurrentSpot(game, currentPoint) {
+ function renderCurrentSpot(game, currentPoint) {
   const { two, edgeLength, views: { pitch: { anchor } } } = game;
   two.remove(game.handles.currentPositionDot);
   two.remove(game.handles.currentPositionRing);
@@ -266,12 +270,12 @@ export function renderCurrentSpot(game, currentPoint) {
   game.handles.currentPositionRing = breathingCircle;
 }
 
-export function eraseMoveableSpots(game) {
+ function eraseMoveableSpots(game) {
   const { two } = game;
   two.remove(game.handles.moveableSpots);
 }
 
-export function renderPlayerGraphics(game) {
+ function renderPlayerGraphics(game) {
   const { two } = game
   const currentPoint = game.model.pointList[game.model.pointList.length - 1];
   renderLinePath(game, game.model.pointList);
@@ -287,7 +291,7 @@ export function renderPlayerGraphics(game) {
   two.update();
 }
 
-export function renderMoveableSpots(game) {
+ function renderMoveableSpots(game) {
   const { two, edgeLength } = game;
   const radius = edgeLength / 8;
   const currentPoint = game.model.pointList[game.model.pointList.length - 1];
@@ -369,15 +373,15 @@ export function renderMoveableSpots(game) {
 // these renderers could be moved to specific folders.
 // like, renderers/pitch
 
-export function renderPitch(game) {
-  game.handles.graphPaper = renderGraphPaper(game);
-  game.handles.pitchBorders = renderPitchBorders(game);
-  game.handles.startPositionDot = renderStartDot(game);
+ function renderPitch(game) {
+  renderGraphPaper(game);
+  renderPitchBorders(game);
+  renderStartDot(game);
   renderPitchGoals(game)
   renderPlayerGraphics(game);
 }
 
-export function renderHeader(game) {
+ function renderHeader(game) {
   const {two, edgeLength, appWidth, views} = game
   const { header } = views;
   const { anchor, end } = header;
@@ -415,7 +419,7 @@ export function renderHeader(game) {
   numberOfMovesText._renderer.elem.setAttribute('text-anchor', 'start');
 }
 
-export function renderFooter(game) {
+ function renderFooter(game) {
   const {two, views, edgeLength, appWidth, appHeight} = game;
   const { footer } = views;
   const { anchor, end } = footer;

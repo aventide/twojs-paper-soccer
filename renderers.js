@@ -401,16 +401,21 @@ export function renderGame(game) {
   };
 
   // clean up old text
-  if(game.handles.turnNumber){
-    two.remove(game.handles.turnNumber);
+  if(game.handles.header){
+    two.remove(game.handles.header);
   }
 
   const turnText = two.makeText("Turn:", anchor.x, 15, turnStyles);
   const movesText = two.makeText("Moves:", end.x - edgeLength, 15, turnStyles);
- 
   const playerNameText = two.makeText("Alex", anchor.x, anchor.y + edgeLength, playerNameStyles);
   const numberOfMovesText = two.makeText(game.model.turnNumber, end.x - edgeLength , end.y - edgeLength, playerNameStyles);
-  game.handles.turnNumber = numberOfMovesText;
+
+  game.handles.header = two.makeGroup([
+    turnText,
+    movesText,
+    playerNameText,
+    numberOfMovesText
+  ])
 
   game.two.update()
   turnText._renderer.elem.setAttribute('text-anchor', 'start');

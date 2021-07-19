@@ -14,7 +14,10 @@ export function renderGame(game) {
   if (selectedLayer === 'start') {
     renderStartMenu(game);
   } else {
-    game.two.clear();
+
+    // this is a problem because the buttons
+    // get wiped out. Need to re-insert them on render
+    // game.two.clear();
     renderHeader(game);
     renderPitch(game);
     renderFooter(game)
@@ -33,19 +36,19 @@ export function renderGame(game) {
 
   // 200 is the known height. We want to get to the proper scale value.
   // ScaleValue = edgeLength / known value
-  game.handles.buttons.start.scale = edgeLength / 200;
-  game.handles.buttons.start.translation.set(centerpointX, heightBound - (edgeLength * 0.5));
-  game.handles.buttons.start.visible = true;
-  game.handles.buttons.start._renderer.elem.addEventListener('click', () => {
-    game.handles.buttons.start.visible = false;
-    game.handles.buttons.rules.visible = false;
+  game.handles.sprites.start.scale = edgeLength / 200;
+  game.handles.sprites.start.translation.set(centerpointX, heightBound - (edgeLength * 0.5));
+  game.handles.sprites.start.visible = true;
+  game.handles.sprites.start._renderer.elem.addEventListener('click', () => {
+    game.handles.sprites.start.visible = false;
+    game.handles.sprites.rules.visible = false;
     game.selectedLayer = "game";
     renderGame(game);
   })
 
-  game.handles.buttons.rules.scale = edgeLength / 200;
-  game.handles.buttons.rules.translation.set(centerpointX, heightBound + edgeLength * 1.5);
-  game.handles.buttons.rules.visible = true;
+  game.handles.sprites.rules.scale = edgeLength / 200;
+  game.handles.sprites.rules.translation.set(centerpointX, heightBound + edgeLength * 1.5);
+  game.handles.sprites.rules.visible = true;
 }
 
  function renderGraphPaper(game) {
@@ -183,14 +186,14 @@ export function renderGame(game) {
   // ScaleValue = edgeLength / known value
 
   // goalshade purple
-  game.handles.buttons.goalshade_purple.scale = edgeLength / 200;
-  game.handles.buttons.goalshade_purple.translation.set(centerpointX, anchor.y + (edgeLength * 0.25));
-  game.handles.buttons.goalshade_purple.visible = true;
+  game.handles.sprites.goalshade_purple.scale = edgeLength / 200;
+  game.handles.sprites.goalshade_purple.translation.set(centerpointX, anchor.y + (edgeLength * 0.125));
+  game.handles.sprites.goalshade_purple.visible = true;
 
   // goalshade orange
-  game.handles.buttons.goalshade_orange.scale = edgeLength / 200;
-  game.handles.buttons.goalshade_orange.translation.set(centerpointX, end.y - (edgeLength * 0.25));
-  game.handles.buttons.goalshade_orange.visible = true;
+  game.handles.sprites.goalshade_orange.scale = edgeLength / 200;
+  game.handles.sprites.goalshade_orange.translation.set(centerpointX, end.y - (edgeLength * 0.125));
+  game.handles.sprites.goalshade_orange.visible = true;
 }
 
  function renderStartDot(game) {
@@ -246,27 +249,32 @@ export function renderGame(game) {
   const { two, edgeLength, views: { pitch: { anchor } } } = game;
   two.remove(game.handles.currentPositionDot);
   two.remove(game.handles.currentPositionRing);
-  const centerDot = two.makeCircle(
-    anchor.x + currentPoint.x * edgeLength,
-    anchor.y + currentPoint.y * edgeLength,
-    6
-  );
+  // const centerDot = two.makeCircle(
+  //   anchor.x + currentPoint.x * edgeLength,
+  //   anchor.y + currentPoint.y * edgeLength,
+  //   6
+  // );
+
+  game.handles.sprites.ball.scale = edgeLength / 200;
+  game.handles.sprites.ball.translation.set(    anchor.x + currentPoint.x * edgeLength,
+    anchor.y + currentPoint.y * edgeLength);
+  game.handles.sprites.ball.visible = true;
 
   const turnForColor = game.model.turnFor === PLAYER_ONE ? 'rgba(102,51,153,1)' : 'rgba(238,118,0,1)';
-  centerDot.fill = turnForColor;
-  centerDot.stroke = turnForColor;
+  // centerDot.fill = turnForColor;
+  // centerDot.stroke = turnForColor;
 
   const breathingCircle = two.makeCircle(
     anchor.x + currentPoint.x * edgeLength,
     anchor.y + currentPoint.y * edgeLength,
-    edgeLength / 4
+    edgeLength / 3
   )
 
   breathingCircle.stroke = turnForColor;
   breathingCircle.linewidth = 5;
   breathingCircle.noFill();
 
-  game.handles.currentPositionDot = centerDot;
+  // game.handles.currentPositionDot = centerDot;
   game.handles.currentPositionRing = breathingCircle;
 }
 

@@ -17,16 +17,18 @@ export function createGame() {
     const two = new Two(DEFAULT_PITCH_DIMENSIONS);
     two.appendTo(appElem);
 
-    const buttons = {}
+    const sprites = {}
     const svgs = document.querySelectorAll('#assets svg');
     svgs.forEach(svg => {
         const shape = two.interpret(svg).center();
         shape.visible = false
-        buttons[shape.id] = shape;
+        sprites[shape.id] = shape;
     })
 
     // this must be done before any event listeners are defined.
     two.update();
+
+    console.log(sprites)
     
     // views: subdvisions of the main canvas specific for this game. Used for placement of main elements
     // model: effective state to base rendering from
@@ -38,7 +40,7 @@ export function createGame() {
       ...INITIAL_GAME_MODEL,
       handles: {
           ...INITIAL_GAME_MODEL.handles,
-          buttons
+          sprites
       },
       two,
     };    

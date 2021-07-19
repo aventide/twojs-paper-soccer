@@ -1,7 +1,6 @@
 import {
   NUMBER_PITCH_COLS,
   NUMBER_PITCH_ROWS,
-  PITCH_EDGE_POINTS,
 } from "./constants";
 
 import { createGame } from './core';

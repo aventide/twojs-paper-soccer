@@ -19,16 +19,19 @@ export function createGame() {
 
     const sprites = {}
     const svgs = document.querySelectorAll('#assets svg');
+
     svgs.forEach(svg => {
         const shape = two.interpret(svg).center();
         shape.visible = false
         sprites[shape.id] = shape;
     })
 
+    const ball = document.querySelector('#assets #ball-svg svg')
+    const goalshade_orange = document.querySelector('#assets #goalshade-orange-svg svg')
+    const goalshade_purple = document.querySelector('#assets #goalshade-purple-svg svg')
+
     // this must be done before any event listeners are defined.
     two.update();
-
-    console.log(sprites)
     
     // views: subdvisions of the main canvas specific for this game. Used for placement of main elements
     // model: effective state to base rendering from
@@ -38,6 +41,11 @@ export function createGame() {
 
     return {
       ...INITIAL_GAME_MODEL,
+      assets: {
+          ball,
+          goalshade_orange,
+          goalshade_purple
+      },
       handles: {
           ...INITIAL_GAME_MODEL.handles,
           sprites

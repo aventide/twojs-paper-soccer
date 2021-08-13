@@ -64,6 +64,7 @@ export function renderGame(game) {
       anchor.y + x * edgeLength
     );
     line.stroke = "#07bde5";
+
     line.opacity = 0.5;
     lines.push(lines);
   }
@@ -186,11 +187,19 @@ export function renderGame(game) {
   // ScaleValue = edgeLength / known value
 
   // goalshade purple
+  two.remove(game.handles.sprites.goalshade_purple)
+
+  const goalshade_purple = two.interpret(game.assets.goalshade_purple).center();
+  game.handles.sprites.goalshade_purple = goalshade_purple;
   game.handles.sprites.goalshade_purple.scale = edgeLength / 200;
   game.handles.sprites.goalshade_purple.translation.set(centerpointX, anchor.y + (edgeLength * 0.125));
   game.handles.sprites.goalshade_purple.visible = true;
 
   // goalshade orange
+  two.remove(game.handles.sprites.goalshade_orange)
+
+  const goalshade_orange = two.interpret(game.assets.goalshade_orange).center();
+  game.handles.sprites.goalshade_orange = goalshade_orange;
   game.handles.sprites.goalshade_orange.scale = edgeLength / 200;
   game.handles.sprites.goalshade_orange.translation.set(centerpointX, end.y - (edgeLength * 0.125));
   game.handles.sprites.goalshade_orange.visible = true;
@@ -247,22 +256,18 @@ export function renderGame(game) {
 
  function renderCurrentSpot(game, currentPoint) {
   const { two, edgeLength, views: { pitch: { anchor } } } = game;
-  two.remove(game.handles.currentPositionDot);
   two.remove(game.handles.currentPositionRing);
-  // const centerDot = two.makeCircle(
-  //   anchor.x + currentPoint.x * edgeLength,
-  //   anchor.y + currentPoint.y * edgeLength,
-  //   6
-  // );
+  two.remove(game.handles.sprites.ball)
+
+  const ball = two.interpret(game.assets.ball).center();
+  game.handles.sprites.ball = ball;
 
   game.handles.sprites.ball.scale = edgeLength / 200;
   game.handles.sprites.ball.translation.set(    anchor.x + currentPoint.x * edgeLength,
-    anchor.y + currentPoint.y * edgeLength);
+  anchor.y + currentPoint.y * edgeLength);
   game.handles.sprites.ball.visible = true;
 
-  const turnForColor = game.model.turnFor === PLAYER_ONE ? 'rgba(102,51,153,1)' : 'rgba(238,118,0,1)';
-  // centerDot.fill = turnForColor;
-  // centerDot.stroke = turnForColor;
+  const turnForColor = game.model.turnFor === PLAYER_ONE ? '#9370DB' : '#EE7600';
 
   const breathingCircle = two.makeCircle(
     anchor.x + currentPoint.x * edgeLength,
@@ -274,7 +279,6 @@ export function renderGame(game) {
   breathingCircle.linewidth = 5;
   breathingCircle.noFill();
 
-  // game.handles.currentPositionDot = centerDot;
   game.handles.currentPositionRing = breathingCircle;
 }
 
@@ -383,9 +387,9 @@ export function renderGame(game) {
 
  function renderPitch(game) {
   renderGraphPaper(game);
+  renderPitchGoals(game)
   renderPitchBorders(game);
   renderStartDot(game);
-  renderPitchGoals(game)
   renderPlayerGraphics(game);
 }
 
@@ -415,7 +419,7 @@ export function renderGame(game) {
 
   const turnText = two.makeText("Turn:", anchor.x, 15, turnStyles);
   const movesText = two.makeText("Moves:", end.x - edgeLength, 15, turnStyles);
-  const playerNameText = two.makeText("Alex", anchor.x, anchor.y + edgeLength, playerNameStyles);
+  const playerNameText = two.makeText(game.model.turnFor === 2 ? "Player 2": "Player 1", anchor.x, anchor.y + edgeLength, playerNameStyles);
   const numberOfMovesText = two.makeText(game.model.turnNumber, end.x - edgeLength , end.y - edgeLength, playerNameStyles);
 
   game.handles.header = two.makeGroup([
